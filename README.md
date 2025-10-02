@@ -14,7 +14,7 @@ python -m pip install -r requirements.txt
 # Set your environment variables
 export GITHUB_TOKEN=your_github_personal_access_token
 export GITHUB_USERNAME=your_github_username
-export OPENROUTER_API_KEY=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
+export OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # Run the demo
 bash demo.sh demo
@@ -209,7 +209,7 @@ export GITHUB_TOKEN=your_github_personal_access_token
 export GITHUB_USERNAME=your_github_username
 
 # OpenRouter API (demo key provided)
-export OPENROUTER_API_KEY=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
+export OPENROUTER_API_KEY=your_openrouter_api_key_here
 
 # Optional: Kubernetes Configuration
 export KUBECONFIG=/path/to/kubeconfig

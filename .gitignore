@@ -254,3 +254,15 @@ development/
 # Cache directories
 .cache/
 .cache_*
+
+# API Keys and sensitive data (additional protection)
+*api_key*
+*API_KEY*
+*secret*
+*SECRET*
+*credentials*
+*CREDENTIALS*
+ghp_*
+sk-or-v1-*
+*.key
+*.pem

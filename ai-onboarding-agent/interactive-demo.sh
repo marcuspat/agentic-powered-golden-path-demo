@@ -100,7 +100,7 @@ check_environment() {
 
     if [ -z "$OPENROUTER_API_KEY" ]; then
         print_info "Setting OpenRouter API key for demo..."
-        export OPENROUTER_API_KEY="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"
+        export OPENROUTER_API_KEY="your_openrouter_api_key_here"
     else
         print_success "OpenRouter API key is already configured"
     fi
