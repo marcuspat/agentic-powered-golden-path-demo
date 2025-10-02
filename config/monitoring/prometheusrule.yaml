@@ -1,0 +1,87 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: golden-path-demo-rules
+  namespace: golden-path-demo
+  labels:
+    app: golden-path-demo
+    environment: dev
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: prometheusrule
+    app.kubernetes.io/part-of: golden-path-demo
+spec:
+  groups:
+  - name: golden-path-demo.rules
+    rules:
+    - alert: GoldenPathDemoDown
+      expr: up{job="golden-path-demo"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo is down"
+        description: "Golden Path Demo has been down for more than 1 minute."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"
+
+    - alert: GoldenPathDemoHighErrorRate
+      expr: rate(http_requests_total{job="golden-path-demo",status=~"5.."}[5m]) > 0.1
+      for: 5m
+      labels:
+        severity: warning
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo high error rate"
+        description: "Golden Path Demo error rate is {{ $value }} errors per second."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"
+
+    - alert: GoldenPathDemoHighLatency
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="golden-path-demo"}[5m])) > 1
+      for: 5m
+      labels:
+        severity: warning
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo high latency"
+        description: "Golden Path Demo 95th percentile latency is {{ $value }} seconds."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"
+
+    - alert: GoldenPathDemoHighMemoryUsage
+      expr: container_memory_usage_bytes{pod=~"golden-path-demo-.*"} / container_spec_memory_limit_bytes > 0.9
+      for: 5m
+      labels:
+        severity: warning
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo high memory usage"
+        description: "Golden Path Demo memory usage is above 90% of limit."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"
+
+    - alert: GoldenPathDemoHighCPUUsage
+      expr: rate(container_cpu_usage_seconds_total{pod=~"golden-path-demo-.*"}[5m]) / container_spec_cpu_limit * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo high CPU usage"
+        description: "Golden Path Demo CPU usage is above 80% of limit."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"
+
+    - alert: GoldenPathDemoPodRestarts
+      expr: increase(kube_pod_container_status_restarts_total{pod=~"golden-path-demo-.*"}[15m]) > 2
+      for: 0m
+      labels:
+        severity: warning
+        service: golden-path-demo
+        team: platform
+      annotations:
+        summary: "Golden Path Demo pod restarts"
+        description: "Golden Path Demo pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+        runbook_url: "https://github.com/your-org/golden-path-demo-source/docs/runbooks.md"

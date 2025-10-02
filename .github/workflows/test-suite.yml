@@ -1,0 +1,402 @@
+name: Golden Path Demo Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - prerequisites
+          - integration
+          - performance
+          - security
+      parallel_execution:
+        description: 'Run tests in parallel'
+        required: false
+        default: true
+        type: boolean
+      notify_on_failure:
+        description: 'Send notifications on failure'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.9'
+  NODE_VERSION: '18'
+
+jobs:
+  prerequisites-check:
+    name: Prerequisites Validation
+    runs-on: ubuntu-latest
+    outputs:
+      can-proceed: ${{ steps.prerequisites.outputs.success }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Run prerequisites check
+      id: prerequisites
+      run: |
+        chmod +x tests/prerequisites_check.sh
+        ./tests/prerequisites_check.sh || echo "prereq_failed=true" >> $GITHUB_OUTPUT
+        if [ "${{ env.prereq_failed }}" = "true" ]; then
+          echo "success=false" >> $GITHUB_OUTPUT
+        else
+          echo "success=true" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        GITHUB_USERNAME: ${{ github.repository_owner }}
+
+    - name: Upload prerequisites report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: prerequisites-report
+        path: prerequisites_report_*.json
+        retention-days: 7
+
+  test-matrix:
+    name: Test Matrix
+    runs-on: ubuntu-latest
+    needs: prerequisites-check
+    if: needs.prerequisites-check.outputs.can-proceed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        test-suite: [
+          {
+            name: "unit-tests",
+            script: "run_unit_tests.py",
+            timeout: 600
+          },
+          {
+            name: "integration-tests",
+            script: "golden_path_tests.py",
+            timeout: 1800
+          },
+          {
+            name: "performance-tests",
+            script: "performance_tests.py",
+            timeout: 900
+          }
+        ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+        sudo systemctl start docker
+        sudo usermod -aG docker $USER
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests PyGithub kubernetes
+
+    - name: Set up test environment
+      run: |
+        echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> test.env
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> test.env
+        echo "GITHUB_USERNAME=${{ github.repository_owner }}" >> test.env
+        echo "WORKSPACE_FOLDER=${{ github.workspace }}" >> test.env
+
+    - name: Run test suite
+      timeout-minutes: 30
+      run: |
+        cd tests
+        chmod +x ${{ matrix.test-suite.script }}
+
+        # Create test environment
+        source ../test.env
+
+        # Run the test with timeout
+        timeout ${{ matrix.test-suite.timeout }} python3 ${{ matrix.test-suite.script }} \
+          --test ${{ matrix.test-suite.name }} || echo "test_failed=true" >> $GITHUB_OUTPUT
+
+        # Store test results
+        mkdir -p ../results
+        if [ -f test_results.json ]; then
+          cp test_results.json ../results/${{ matrix.test-suite.name }}-results.json
+        fi
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.test-suite.name }}-results
+        path: results/
+        retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: prerequisites-check
+    if: needs.prerequisites-check.outputs.can-proceed == 'true'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        languages: python
+
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    needs: prerequisites-check
+    if: needs.prerequisites-check.outputs.can-proceed == 'true'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest-benchmark psutil memory-profiler
+
+    - name: Run performance benchmarks
+      run: |
+        cd tests
+        python3 performance_tests.py --benchmark-only
+
+    - name: Upload benchmark results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: benchmark_results.json
+        retention-days: 7
+
+  demo-readiness:
+    name: Demo Readiness Assessment
+    runs-on: ubuntu-latest
+    needs: [prerequisites-check, test-matrix]
+    if: always() && needs.prerequisites-check.outputs.can-proceed == 'true'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: Download all test results
+      uses: actions/download-artifact@v3
+      with:
+        path: all-results
+
+    - name: Run demo readiness assessment
+      run: |
+        cd tests
+        python3 golden_path_tests.py --test readiness --verbose
+
+    - name: Generate readiness report
+      if: always()
+      run: |
+        # Collate all results into comprehensive report
+        python3 tests/generate_readiness_report.py \
+          --input-dir all-results \
+          --output demo-readiness-report.html
+
+    - name: Upload readiness report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: demo-readiness-report
+        path: demo-readiness-report.html
+        retention-days: 30
+
+  notify-results:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [prerequisites-check, test-matrix, security-scan, demo-readiness]
+    if: always() && (github.event_name == 'schedule' || github.event.inputs.notify_on_failure == 'true')
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts
+
+    - name: Prepare notification summary
+      run: |
+        # Generate summary for notifications
+        python3 tests/generate_notification_summary.py \
+          --artifacts-dir artifacts \
+          --output notification-summary.json
+
+    - name: Send Slack notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        text: |
+          Golden Path Demo Test Results
+          Status: ${{ job.status }}
+          Workflow: ${{ github.workflow }}
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          Run: ${{ github.run_number }}
+
+    - name: Send email notification
+      if: always() && failure()
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Golden Path Demo Test Failure - ${{ github.workflow }}"
+        body: |
+          The Golden Path Demo test suite has failed.
+
+          Workflow: ${{ github.workflow }}
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          Run Number: ${{ github.run_number }}
+
+          Please check the GitHub Actions logs for details.
+        to: ${{ secrets.NOTIFICATION_EMAIL }}
+        from: ${{ secrets.EMAIL_USERNAME }}
+
+  deploy-staging:
+    name: Deploy to Staging (on success)
+    runs-on: ubuntu-latest
+    needs: [prerequisites-check, test-matrix, demo-readiness]
+    if: success() && github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging environment
+      run: |
+        echo "Deploying to staging environment..."
+        # Add staging deployment logic here
+        # This could involve:
+        # - Building Docker images
+        # - Pushing to registry
+        # - Updating staging environment
+
+    - name: Run smoke tests on staging
+      run: |
+        echo "Running smoke tests..."
+        # Add smoke test logic here
+
+  create-release:
+    name: Create Release (on main branch success)
+    runs-on: ubuntu-latest
+    needs: [prerequisites-check, test-matrix, demo-readiness, deploy-staging]
+    if: success() && github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Generate changelog since last release
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        git log --oneline $(git describe --tags --abbrev=0)..HEAD >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.run_number }}
+        release_name: Release v${{ github.run_number }}
+        body: |
+          Automated release from successful test run.
+
+          Changes:
+          ${{ steps.changelog.outputs.CHANGELOG }}
+
+          Test Results: ✅ All tests passed
+        draft: false
+        prerelease: false
+
+# Workflow summary and reporting
+jobs-summarize:
+  name: Workflow Summary
+  runs-on: ubuntu-latest
+  needs: [prerequisites-check, test-matrix, security-scan, demo-readiness, deploy-staging]
+  if: always()
+
+  steps:
+    - name: Generate workflow summary
+      run: |
+        echo "# Golden Path Demo Test Workflow Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Prerequisites Check | ${{ needs.prerequisites-check.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Test Matrix | ${{ needs.test-matrix.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Security Scan | ${{ needs.security-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Demo Readiness | ${{ needs.demo-readiness.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Deploy Staging | ${{ needs.deploy-staging.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Overall Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY

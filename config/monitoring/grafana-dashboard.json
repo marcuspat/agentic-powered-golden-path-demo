@@ -1,0 +1,128 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Golden Path Demo",
+    "tags": ["golden-path-demo", "nodejs", "application"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"golden-path-demo\"}[5m])",
+            "legendFormat": "{{method}} {{status}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Requests/sec"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"golden-path-demo\"}[5m]))",
+            "legendFormat": "50th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"golden-path-demo\"}[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=\"golden-path-demo\"}[5m]))",
+            "legendFormat": "99th percentile"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Seconds"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"golden-path-demo\",status=~\"4..\"}[5m])",
+            "legendFormat": "4xx errors"
+          },
+          {
+            "expr": "rate(http_requests_total{job=\"golden-path-demo\",status=~\"5..\"}[5m])",
+            "legendFormat": "5xx errors"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Errors/sec"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{pod=~\"golden-path-demo-.*\"}",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "Bytes"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{pod=~\"golden-path-demo-.*\"}[5m])",
+            "legendFormat": "{{pod}}"
+          }
+        ],
+        "yAxes": [
+          {
+            "label": "CPU cores"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Application Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"golden-path-demo\"}",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "valueMaps": [
+          {
+            "value": "1",
+            "text": "UP"
+          },
+          {
+            "value": "0",
+            "text": "DOWN"
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

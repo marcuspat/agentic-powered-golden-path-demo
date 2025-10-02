@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: golden-path-demo-service
+  namespace: golden-path-demo
+  labels:
+    app: golden-path-demo
+    environment: dev
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: service
+    app.kubernetes.io/part-of: golden-path-demo
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+    protocol: TCP
+    appProtocol: http
+  - name: metrics
+    port: 9090
+    targetPort: metrics
+    protocol: TCP
+    appProtocol: http
+  selector:
+    app: golden-path-demo
+  sessionAffinity: None
+  publishNotReadyAddresses: false

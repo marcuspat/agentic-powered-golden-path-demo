@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: golden-path-demo
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: project
+    app.kubernetes.io/part-of: golden-path-demo
+    app.kubernetes.io/managed-by: argocd
+spec:
+  description: Golden Path Demo Project
+  sourceRepos:
+  - https://github.com/your-org/golden-path-demo-gitops.git
+  - https://github.com/your-org/golden-path-demo-source.git
+  destinations:
+  - namespace: golden-path-demo
+    server: https://kubernetes.default.svc
+  - namespace: golden-path-demo-*
+    server: https://kubernetes.default.svc
+  - namespace: argocd
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: rbac.authorization.k8s.io
+    kind: Role
+  - group: rbac.authorization.k8s.io
+    kind: RoleBinding
+  namespaceResourceWhitelist:
+  - group: ''
+    kind: ConfigMap
+  - group: ''
+    kind: Secret
+  - group: ''
+    kind: Service
+  - group: ''
+    kind: ServiceAccount
+  - group: apps
+    kind: Deployment
+  - group: apps
+    kind: ReplicaSet
+  - group: autoscaling
+    kind: HorizontalPodAutoscaler
+  - group: networking.k8s.io
+    kind: Ingress
+  - group: networking.k8s.io
+    kind: NetworkPolicy
+  - group: batch
+    kind: Job
+  - group: batch
+    kind: CronJob
+  orphanedResources:
+    warn: true
+  roles:
+  - name: golden-path-demo-admin
+    description: Admin access to golden-path-demo project
+    policies:
+    - p, proj:golden-path-demo:golden-path-demo-admin, applications, *, golden-path-demo/*, allow
+    groups:
+    - github:cnoe-io:golden-path-demo-team
+    jwtTokens:
+    - iat: 1640995200

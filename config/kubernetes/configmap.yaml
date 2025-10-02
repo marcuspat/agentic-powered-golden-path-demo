@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: golden-path-demo-config
+  namespace: golden-path-demo
+  labels:
+    app: golden-path-demo
+    environment: dev
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: golden-path-demo
+data:
+  APP_VERSION: "1.0.0"
+  ENVIRONMENT: "dev"
+  LOG_LEVEL: "info"
+  API_PORT: "3000"
+  NODE_ENV: "development"
+  CORS_ORIGIN: "*"
+  RATE_LIMIT_WINDOW_MS: "900000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  HEALTH_CHECK_INTERVAL: "30"
+  METRICS_ENABLED: "true"
+  TRACING_ENABLED: "false"

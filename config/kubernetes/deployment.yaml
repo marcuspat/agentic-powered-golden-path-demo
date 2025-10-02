@@ -1,0 +1,172 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golden-path-demo
+  namespace: golden-path-demo
+  labels:
+    app: golden-path-demo
+    version: "1.0.0"
+    environment: dev
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: deployment
+    app.kubernetes.io/part-of: golden-path-demo
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: golden-path-demo
+  template:
+    metadata:
+      labels:
+        app: golden-path-demo
+        version: "1.0.0"
+        environment: dev
+        app.kubernetes.io/name: golden-path-demo
+        app.kubernetes.io/component: deployment
+        app.kubernetes.io/part-of: golden-path-demo
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+      - name: golden-path-demo
+        image: "ghcr.io/cnoe-io/golden-path-demo:1.0.0"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: API_PORT
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: LOG_LEVEL
+        - name: CORS_ORIGIN
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: CORS_ORIGIN
+        - name: RATE_LIMIT_WINDOW_MS
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: RATE_LIMIT_WINDOW_MS
+        - name: RATE_LIMIT_MAX_REQUESTS
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: RATE_LIMIT_MAX_REQUESTS
+        - name: HEALTH_CHECK_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: HEALTH_CHECK_INTERVAL
+        - name: METRICS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: METRICS_ENABLED
+        - name: TRACING_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: golden-path-demo-config
+              key: TRACING_ENABLED
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: golden-path-demo-secrets
+              key: database-url
+              optional: true
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: golden-path-demo-secrets
+              key: redis-url
+              optional: true
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: golden-path-demo-secrets
+              key: jwt-secret
+              optional: true
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          successThreshold: 1
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 30
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      automountServiceAccountToken: false

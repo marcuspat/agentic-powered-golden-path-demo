@@ -1,0 +1,119 @@
+{
+  "execution": {
+    "max_parallel_jobs": 4,
+    "retry_failed_tests": true,
+    "max_retries": 2,
+    "continue_on_failure": false,
+    "timeout_multiplier": 1.5,
+    "cleanup_on_exit": true
+  },
+  "notifications": {
+    "slack_webhook_url": "${SLACK_WEBHOOK_URL}",
+    "email_enabled": false,
+    "email_smtp_server": "smtp.gmail.com",
+    "email_smtp_port": 587,
+    "email_username": "${EMAIL_USERNAME}",
+    "email_password": "${EMAIL_PASSWORD}",
+    "email_recipients": ["devops@example.com"],
+    "notify_on_success": false,
+    "notify_on_failure": true
+  },
+  "reporting": {
+    "generate_html_report": true,
+    "generate_json_report": true,
+    "generate_junit_report": true,
+    "generate_coverage_report": true,
+    "trend_tracking_days": 30,
+    "archive_old_reports": true,
+    "report_retention_days": 90
+  },
+  "thresholds": {
+    "min_success_rate": 80,
+    "max_test_duration": 3600,
+    "max_memory_usage": "4GB",
+    "max_cpu_usage": 90,
+    "security_score_minimum": 70,
+    "performance_regression_threshold": 20
+  },
+  "environments": {
+    "development": {
+      "timeout_multiplier": 2.0,
+      "parallel_jobs": 2,
+      "skip_slow_tests": false,
+      "verbose_logging": true
+    },
+    "staging": {
+      "timeout_multiplier": 1.5,
+      "parallel_jobs": 4,
+      "skip_slow_tests": false,
+      "verbose_logging": false
+    },
+    "production": {
+      "timeout_multiplier": 1.0,
+      "parallel_jobs": 6,
+      "skip_slow_tests": true,
+      "verbose_logging": false
+    }
+  },
+  "test_suites": {
+    "prerequisites": {
+      "script": "prerequisites_check.sh",
+      "timeout": 300,
+      "critical": true,
+      "parallel_safe": false,
+      "dependencies": []
+    },
+    "unit_tests": {
+      "script": "run_unit_tests.py",
+      "timeout": 600,
+      "critical": true,
+      "parallel_safe": true,
+      "dependencies": ["prerequisites"]
+    },
+    "integration_tests": {
+      "script": "golden_path_tests.py",
+      "timeout": 1800,
+      "critical": true,
+      "parallel_safe": false,
+      "dependencies": ["prerequisites", "unit_tests"]
+    },
+    "performance_tests": {
+      "script": "performance_tests.py",
+      "timeout": 900,
+      "critical": false,
+      "parallel_safe": true,
+      "dependencies": ["integration_tests"]
+    },
+    "security_tests": {
+      "script": "security_scan.py",
+      "timeout": 600,
+      "critical": false,
+      "parallel_safe": true,
+      "dependencies": []
+    }
+  },
+  "monitoring": {
+    "enable_resource_monitoring": true,
+    "monitoring_interval": 5,
+    "collect_metrics": ["cpu", "memory", "disk_io", "network_io"],
+    "alert_thresholds": {
+      "cpu_usage": 95,
+      "memory_usage": 90,
+      "disk_usage": 85
+    }
+  },
+  "cleanup": {
+    "cleanup_temp_files": true,
+    "cleanup_docker_containers": true,
+    "cleanup_kubernetes_resources": true,
+    "cleanup_git_repos": true,
+    "retain_debug_artifacts": false
+  },
+  "git_operations": {
+    "create_test_branches": true,
+    "auto_merge_on_success": false,
+    "require_review": true,
+    "cleanup_branches": true,
+    "tag_successful_runs": true
+  }
+}

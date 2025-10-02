@@ -1,0 +1,89 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: golden-path-demo-set
+  namespace: argocd
+  labels:
+    project: golden-path-demo
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: applicationset
+    app.kubernetes.io/part-of: golden-path-demo
+    app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: CreateNamespace=true
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/your-org/golden-path-demo-gitops.git
+      revision: HEAD
+      directories:
+      - path: environments/*
+  template:
+    metadata:
+      name: 'golden-path-demo-{{path.basename}}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      labels:
+        environment: '{{path.basename}}'
+        project: golden-path-demo
+        app.kubernetes.io/name: golden-path-demo
+        app.kubernetes.io/component: application
+        app.kubernetes.io/part-of: golden-path-demo
+        app.kubernetes.io/managed-by: argocd
+        generated-by: applicationset
+      annotations:
+        argocd.argoproj.io/sync-options: CreateNamespace=true
+        notifications.argoproj.io/subscribe.on-sync-succeeded.slack: golden-path-alerts
+        notifications.argoproj.io/subscribe.on-sync-failed.slack: golden-path-alerts
+        notifications.argoproj.io/subscribe.on-health-degraded.slack: golden-path-alerts
+    spec:
+      project: default
+      sources:
+      - repoURL: https://github.com/your-org/golden-path-demo-gitops.git
+        targetRevision: HEAD
+        path: 'environments/{{path.basename}}'
+        ref: values
+      - repoURL: https://github.com/your-org/golden-path-demo-source.git
+        targetRevision: main
+        path: .version
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'golden-path-demo-{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - PrunePropagationPolicy=foreground
+          - PruneLast=true
+          - RespectIgnoreDifferences=true
+          - ApplyOutOfSyncOnly=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+      revisionHistoryLimit: 10
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+        - /spec/replicas
+      - group: autoscaling
+        kind: HorizontalPodAutoscaler
+        jsonPointers:
+        - /spec/minReplicas
+        - /spec/maxReplicas
+      info:
+      - name: Environment
+        value: '{{path.basename}}'
+      - name: Repository
+        value: https://github.com/your-org/golden-path-demo-gitops
+      - name: Documentation
+        value: https://github.com/your-org/golden-path-demo-source/docs
+  syncPolicy:
+    preserveResourcesOnDeletion: false

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{appName}}
+  namespace: default
+  labels:
+    app: {{appName}}
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{appName}}
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: {{appName}}
+        version: v1
+    spec:
+      containers:
+      - name: {{appName}}
+        image: {{imageName}}:{{imageTag}}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "8080"
+        - name: APP_NAME
+          value: "{{appName}}"
+        - name: APP_DESCRIPTION
+          value: "{{description}}"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL

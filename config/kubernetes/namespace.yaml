@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: golden-path-demo
+  labels:
+    environment: dev
+    project: golden-path-demo
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: namespace
+    app.kubernetes.io/part-of: golden-path-demo
+spec: {}

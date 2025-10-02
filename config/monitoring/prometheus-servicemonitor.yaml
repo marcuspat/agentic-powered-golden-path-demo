@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: golden-path-demo
+  namespace: golden-path-demo
+  labels:
+    app: golden-path-demo
+    environment: dev
+    managed-by: argocd
+    app.kubernetes.io/name: golden-path-demo
+    app.kubernetes.io/component: servicemonitor
+    app.kubernetes.io/part-of: golden-path-demo
+spec:
+  selector:
+    matchLabels:
+      app: golden-path-demo
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+    scheme: http
+    honorLabels: true
+    metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: 'go_.*'
+      action: drop
+    - sourceLabels: [__name__]
+      regex: 'process_.*'
+      action: drop
+    - sourceLabels: [__name__]
+      regex: 'prometheus_.*'
+      action: drop
+  namespaceSelector:
+    matchNames:
+    - golden-path-demo
