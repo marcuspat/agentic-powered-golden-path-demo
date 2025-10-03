@@ -17,7 +17,8 @@ export OPENROUTER_API_KEY=your_openrouter_api_key_here
 ./idpbuilder create
 
 # Run the demo
-cd ai-onboarding-agent && bash demo.sh demo
+cd ai-onboarding-agent
+bash demo.sh demo
 ```
 
 ## 📋 Prerequisites
