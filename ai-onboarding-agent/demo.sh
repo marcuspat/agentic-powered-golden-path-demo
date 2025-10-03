@@ -69,13 +69,13 @@ check_cluster() {
     print_header "Checking idpbuilder Cluster Status"
 
     if command -v ./idpbuilder &> /dev/null; then
-        if ./idpbuilder cluster status &> /dev/null; then
+        if ./idpbuilder get status &> /dev/null; then
             print_status "✅ idpbuilder cluster is running"
             CLUSTER_READY=true
         else
             print_warning "idpbuilder cluster is not running"
             print_status "Starting idpbuilder cluster..."
-            ./idpbuilder cluster create --name demo-cluster
+            ./idpbuilder create --name demo-cluster
             CLUSTER_READY=true
         fi
     else

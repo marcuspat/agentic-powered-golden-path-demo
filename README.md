@@ -16,8 +16,8 @@ export GITHUB_TOKEN=your_github_personal_access_token
 export GITHUB_USERNAME=your_github_username
 export OPENROUTER_API_KEY=your_openrouter_api_key_here
 
-# Run the demo
-bash demo.sh demo
+# Run the demo (copy idpbuilder to agent directory first)
+cp ../idpbuilder ./ && bash demo.sh demo
 ```
 
 ## 📋 Prerequisites
@@ -99,11 +99,11 @@ python3 agent.py "Deploy my payment-processor application"
 ### Demo Script Usage
 ```bash
 cd ai-onboarding-agent
-bash demo.sh demo           # Run complete demo
-bash demo.sh test           # Run tests only
-bash demo.sh agent "Deploy my user-service"  # Test specific request
-bash demo.sh cluster        # Check cluster status
-bash demo.sh help           # Show help
+cp ../idpbuilder ./ && bash demo.sh demo           # Run complete demo
+cp ../idpbuilder ./ && bash demo.sh test           # Run tests only
+cp ../idpbuilder ./ && bash demo.sh agent "Deploy my user-service"  # Test specific request
+cp ../idpbuilder ./ && bash demo.sh cluster        # Check cluster status
+cp ../idpbuilder ./ && bash demo.sh help           # Show help
 ```
 
 ## 🌐 Access Points
