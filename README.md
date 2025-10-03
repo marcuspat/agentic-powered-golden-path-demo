@@ -114,173 +114,31 @@ bash demo.sh help                                   # Show help
 - `help` - Show all available options
 - `interactive` - Run interactive expert training mode
 
-## 🎓 Interactive Expert Training Mode
+## 🎓 Interactive Demo Mode
 
-The **interactive-demo.sh** script provides a comprehensive, guided walkthrough with before/after states, visual feedback, and expert training mode.
-
-### Features
-
-🎯 **Step-by-Step Guidance** - Each phase shows before/after states with clear explanations
-🤖 **AI Processing Visualization** - Watch AI extract app names in real-time
-🎨 **Rich Visual Interface** - Colored output, animations, and progress indicators
-📊 **Template System Demo** - See Jinja2 templating and variable substitution
-🚀 **Live Deployment Mode** - Optional real deployments to Kubernetes
-🎓 **Expert Training** - Interactive learning modules for deep understanding
+The **interactive-demo.sh** script provides a comprehensive walkthrough with visual feedback and step-by-step guidance.
 
 ### Usage
-
 ```bash
 cd ai-onboarding-agent
 
-# Run interactive demo (demo mode)
+# Run interactive demo
 ./interactive-demo.sh
-
-# Run with live deployments (requires GitHub credentials)
-./interactive-demo.sh --deploy
 
 # Show help
 ./interactive-demo.sh --help
 ```
 
 ### Demo Workflow
+- **Step 1**: Environment setup verification
+- **Step 2**: Infrastructure verification (idpbuilder cluster, ArgoCD)
+- **Step 3**: AI-powered name extraction demonstration
+- **Step 4**: Template system verification
+- **Step 5**: Agent workflow testing
+- **Step 6**: Access information display
+- **Step 7**: Live demo mode with interactive requests
 
-The interactive demo walks through **7 comprehensive steps**:
-
-#### Step 1: Environment Setup Verification
-- ✅ Check GitHub token and username configuration
-- ✅ Verify OpenRouter API key setup
-- ✅ Demo mode fallback for missing credentials
-
-#### Step 2: Infrastructure Verification
-- ✅ Validate idpbuilder cluster status
-- ✅ Check ArgoCD pod health
-- ✅ Show cluster details and component status
-
-#### Step 3: AI-Powered Name Extraction
-- 🤖 Live AI processing of natural language requests
-- 📝 Real-time application name extraction
-- 🧠 Multiple request pattern examples
-- ✨ Pattern matching fallback demonstrations
-
-#### Step 4: Template System Verification
-- 📋 NodeJS application template validation
-- ⚙️ GitOps manifest template checking
-- 🔄 Live Jinja2 template substitution demo
-- 📊 Before/after template rendering comparison
-
-#### Step 5: Agent Workflow Testing
-- 🔧 Complete agent functionality demonstration
-- 📊 Repository creation simulation
-- 🚀 ArgoCD application setup process
-- ✅ End-to-end workflow validation
-
-#### Step 6: Access Information
-- 🌐 ArgoCD dashboard credentials and URLs
-- 📱 Application access patterns
-- 🔐 Password retrieval instructions
-- 📊 Cluster access methods
-
-#### Step 7: Live Demo Mode
-- 🎮 Interactive deployment requests
-- ⚡ Real-time Kubernetes deployment
-- 📈 Progress monitoring and status updates
-- 🎉 Application launch celebration
-
-### Expert Training Mode
-
-After completing the main demo, you'll be invited to **expert training mode** featuring:
-
-🎓 **Deep Learning Modules**
-- GitOps principles and best practices
-- ArgoCD advanced features and operations
-- Kubernetes deployment strategies
-- AI agent architecture and customization
-
-🔧 **Hands-On Workshops**
-- Custom template creation
-- Advanced troubleshooting scenarios
-- Performance optimization techniques
-- Multi-environment deployment patterns
-
-📊 **Real-World Scenarios**
-- Production deployment considerations
-- Security and compliance requirements
-- Scaling and monitoring strategies
-- Team collaboration workflows
-
-### Visual Features
-
-🎨 **Rich Interface Elements**
-- Colored output for different message types
-- Progress spinners and animations
-- Step-by-step progress indicators
-- Before/after state comparisons
-
-📊 **Information Display**
-- Cluster status dashboards
-- Pod health monitoring
-- Template rendering visualization
-- Deployment progress tracking
-
-### Environment Variables
-
-```bash
-# Required for live deployments
-export GITHUB_TOKEN=your_github_personal_access_token
-export GITHUB_USERNAME=your_github_username
-
-# AI processing (demo key provided)
-export OPENROUTER_API_KEY=your_openrouter_api_key_here
-```
-
-### Demo vs Live Mode
-
-**Demo Mode (Default)**
-- ✅ No GitHub credentials required
-- ✅ Simulated deployments
-- ✅ Full AI processing demonstration
-- ✅ Complete workflow visualization
-- ✅ All template and system validation
-
-**Live Mode (`--deploy` flag)**
-- ✅ Requires GitHub credentials
-- ✅ Real repository creation
-- ✅ Actual Kubernetes deployments
-- ✅ Real ArgoCD applications
-- ✅ Live application URLs
-
-### Troubleshooting
-
-```bash
-# Check if script is executable
-chmod +x interactive-demo.sh
-
-# Verify dependencies
-which python3 kubectl
-
-# Check cluster status
-../idpbuilder get status
-
-# Test AI extraction manually
-python3 -c "from agent import extract_app_name_from_request; print(extract_app_name_from_request('test'))"
-```
-
-### Sample Output
-
-```
-═══════════════════════════════════════════════════════════════
-🚀 Step 3: AI-Powered Name Extraction
-─────────────────────────────────────────────────────────────
-
-📋 BEFORE: Sending request to AI agent: "I need to deploy my new NodeJS service called inventory-api"
-
-🤖 Processing...
-🧠 Analyzing request...
-📝 Extracting application name...
-✨ Extracted: "inventory-api"
-
-✅ AFTER: AI successfully extracted application name
-```
+Both `demo.sh` and `interactive-demo.sh` will automatically create real GitHub repositories and deploy applications when GitHub credentials are provided.
 
 ## 🌐 Access Points
 
