@@ -289,8 +289,8 @@ argocd app delete <app-name>
 
 2. **Cluster Not Running**
    ```bash
-   # Check cluster status
-   ./idpbuilder get status
+   # Check available clusters
+   ./idpbuilder get clusters
 
    # Start idpbuilder cluster
    ./idpbuilder create --name demo-cluster
