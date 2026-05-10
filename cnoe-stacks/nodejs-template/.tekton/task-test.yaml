@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: nodejs-unit-test
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  description: Install dependencies and run the project's test script.
+  workspaces:
+    - name: source
+      description: Working directory containing package.json.
+  steps:
+    - name: install-and-test
+      image: node:20-alpine
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/sh
+        set -eu
+        echo "[test] node $(node -v) / npm $(npm -v)"
+        npm ci
+        npm test

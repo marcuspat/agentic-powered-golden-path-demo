@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ appName }}
+  namespace: {{ namespace | default(appName) }}
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ appName }}
+  namespaceSelector:
+    matchNames:
+      - {{ namespace | default(appName) }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

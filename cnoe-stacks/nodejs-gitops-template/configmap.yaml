@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ appName }}-config
+  namespace: {{ namespace | default(appName) }}
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+    app.kubernetes.io/version: "0.1.0"
+data:
+  NODE_ENV: production
+  APP_NAME: {{ appName }}
+  APP_DESCRIPTION: {{ description }}

@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "golden-path-agent"
+version = "0.1.0"
+description = "AI-powered onboarding agent for the Golden Path platform demo."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Golden Path Agent Engineering" },
+]
+keywords = ["gitops", "argocd", "kubernetes", "platform-engineering", "ai-agent"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+    "Topic :: System :: Software Distribution",
+]
+
+[project.urls]
+Documentation = "https://github.com/your-org/agentic-powered-golden-path-demo/tree/main/docs"
+Source = "https://github.com/your-org/agentic-powered-golden-path-demo"
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-q -ra --ignore=tests/test_runner.py --ignore=tests/run-all-tests.py --ignore=tests/test-phase3-agent-functionality.py"
+python_files = ["test_*.py", "bench_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "unit: Tier 1 — pure-function unit tests (fast, no I/O)",
+    "integration: Tier 2 — real subprocess/Jinja2/Git, mocked GitHub & OpenRouter",
+    "e2e: Tier 3 — full flow against live cluster + GitHub (RUN_E2E=1)",
+    "performance: Tier 4 — micro-benchmarks; regression-only assertions",
+    "security: Tier 5 — secret leak, dependency, RBAC checks",
+    "legacy: Pre-tier suites kept for safety; excluded by default",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:google.*",
+    "ignore::DeprecationWarning:kubernetes.*",
+]
+
+# ---------------------------------------------------------------------------
+# Coverage (used when --cov is passed)
+# ---------------------------------------------------------------------------
+
+[tool.coverage.run]
+branch = true
+source = ["agent"]
+omit = [
+    "tests/*",
+    "ai-onboarding-agent/*",
+    "src/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 0  # raise once the orchestrator's agent/ slice lands
+
+# ---------------------------------------------------------------------------
+# Ruff (lint + format)
+# ---------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+extend-exclude = [
+    "ai-onboarding-agent",
+    "src",
+    "idpbuilder-source",
+    "ai-platform-engineering",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "SIM",  # flake8-simplify
+]
+ignore = [
+    "E501",  # line length is enforced by the formatter
+    "B008",  # function calls in default args are common in pytest fixtures
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B011", "SIM117"]
+"tests/integration/test_golden_path_legacy.py" = ["F401", "F403", "F405", "I001", "B"]
+"tests/e2e/test_legacy_e2e.py" = ["F401", "F403", "F405", "I001", "B"]
+"tests/performance/test_legacy_performance.py" = ["F401", "F403", "F405", "I001", "B"]
+"tests/security/test_legacy_security_scan.py" = ["F401", "F403", "F405", "I001", "B"]
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+
+[tool.mypy]
+python_version = "3.9"
+files = ["agent"]
+strict = false
+warn_unused_configs = true
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = "agent.*"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true

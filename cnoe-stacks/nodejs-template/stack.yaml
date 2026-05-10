@@ -1,0 +1,26 @@
+# Stack manifest for the Node.js Golden Path template.
+# Read by the agent (and future stack-aware tooling) to discover templates,
+# validate input variables, and locate the source/gitops template directories.
+# See ADR-0012 for the contract this file satisfies.
+apiVersion: cnoe.io/v1alpha1
+kind: Stack
+name: nodejs
+version: 0.1.0
+description: >-
+  Node.js 20 HTTP service with OpenTelemetry, Prometheus metrics, and a
+  paired GitOps template that deploys via ArgoCD into a dedicated namespace
+  with NetworkPolicy, ResourceQuota, and ServiceMonitor baked in.
+maintainers:
+  - name: Platform Engineering
+    role: owner
+requiredVariables:
+  - appName
+  - description
+optionalVariables:
+  - namespace
+  - replicas
+  - image
+  - host
+templates:
+  source: app-source
+  gitops: ../nodejs-gitops-template

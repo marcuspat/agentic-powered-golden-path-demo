@@ -1,0 +1,51 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: bump-gitops
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  description: >-
+    Clone the paired *-gitops repo, sed-replace the image tag in
+    deployment.yaml, commit, and push. ArgoCD reconciles from there.
+  params:
+    - name: gitops-repo-url
+      type: string
+    - name: image
+      type: string
+      description: New image reference (registry/repo:tag).
+    - name: app-name
+      type: string
+    - name: branch
+      type: string
+      default: main
+    - name: git-user-name
+      type: string
+      default: golden-path-agent
+    - name: git-user-email
+      type: string
+      default: golden-path-agent@cnoe.localtest.me
+  workspaces:
+    - name: gitops
+      description: Scratch workspace for the gitops repo clone.
+  steps:
+    - name: clone-bump-push
+      image: alpine/git:2.45.2
+      workingDir: $(workspaces.gitops.path)
+      script: |
+        #!/bin/sh
+        set -eu
+        git config --global user.name  "$(params.git-user-name)"
+        git config --global user.email "$(params.git-user-email)"
+        git clone --depth 1 --branch "$(params.branch)" "$(params.gitops-repo-url)" repo
+        cd repo
+        # Replace the image: line in deployment.yaml with the new reference.
+        sed -i -E "s|^( *image:).*$|\1 $(params.image)|" deployment.yaml
+        if git diff --quiet; then
+          echo "[bump-gitops] no change; skipping commit"
+          exit 0
+        fi
+        git add deployment.yaml
+        git commit -m "chore(gitops): bump $(params.app-name) image to $(params.image)"
+        git push origin "$(params.branch)"

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ appName }}-quota
+  namespace: {{ namespace | default(appName) }}
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  hard:
+    requests.cpu: "2"
+    requests.memory: 2Gi
+    limits.cpu: "4"
+    limits.memory: 4Gi
+    pods: "20"

@@ -1,0 +1,98 @@
+# Tekton Triggers wiring for the {{ appName }} pipeline.
+# An EventListener exposes an HTTP endpoint; GitHub posts a `push` webhook to
+# it; the TriggerBinding extracts repo URL + revision; the TriggerTemplate
+# instantiates a PipelineRun for {{ appName }}-build.
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: {{ appName }}-github-push-binding
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  params:
+    - name: repo-url
+      value: $(body.repository.clone_url)
+    - name: revision
+      value: $(body.after)
+    - name: short-sha
+      value: $(body.after)
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: {{ appName }}-build-template
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  params:
+    - name: repo-url
+    - name: revision
+    - name: short-sha
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: {{ appName }}-build-
+        labels:
+          app.kubernetes.io/name: {{ appName }}
+          app.kubernetes.io/managed-by: golden-path-agent
+      spec:
+        pipelineRef:
+          name: {{ appName }}-build
+        params:
+          - name: repo-url
+            value: $(tt.params.repo-url)
+          - name: revision
+            value: $(tt.params.revision)
+          - name: image
+            value: ghcr.io/cnoe-io/{{ appName }}:$(tt.params.short-sha)
+          - name: gitops-repo-url
+            value: https://github.com/REPLACE_ME/{{ appName }}-gitops.git
+        workspaces:
+          - name: source
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ReadWriteOnce]
+                resources:
+                  requests:
+                    storage: 1Gi
+          - name: gitops
+            volumeClaimTemplate:
+              spec:
+                accessModes: [ReadWriteOnce]
+                resources:
+                  requests:
+                    storage: 256Mi
+          - name: docker-credentials
+            secret:
+              secretName: {{ appName }}-registry-credentials
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: {{ appName }}-github-listener
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  serviceAccountName: tekton-triggers-sa
+  triggers:
+    - name: github-push
+      interceptors:
+        - ref:
+            name: github
+          params:
+            - name: secretRef
+              value:
+                secretName: {{ appName }}-github-webhook
+                secretKey: secretToken
+            - name: eventTypes
+              value:
+                - push
+      bindings:
+        - ref: {{ appName }}-github-push-binding
+      template:
+        ref: {{ appName }}-build-template

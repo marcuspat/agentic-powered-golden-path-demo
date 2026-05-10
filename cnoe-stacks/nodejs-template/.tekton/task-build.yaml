@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kaniko-build
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  description: Build a container image with kaniko and push it to a registry.
+  params:
+    - name: image
+      type: string
+      description: Fully-qualified image reference, including tag.
+    - name: dockerfile
+      type: string
+      default: ./Dockerfile
+    - name: context
+      type: string
+      default: ./
+  workspaces:
+    - name: source
+      description: Build context (the repo checkout).
+    - name: docker-credentials
+      description: Mount providing config.json with registry credentials.
+  results:
+    - name: image-digest
+      description: Digest of the pushed image.
+  steps:
+    - name: build-and-push
+      image: gcr.io/kaniko-project/executor:v1.23.2
+      workingDir: $(workspaces.source.path)
+      env:
+        - name: DOCKER_CONFIG
+          value: $(workspaces.docker-credentials.path)
+      args:
+        - --dockerfile=$(params.dockerfile)
+        - --context=$(workspaces.source.path)/$(params.context)
+        - --destination=$(params.image)
+        - --digest-file=$(results.image-digest.path)
+        - --cache=true

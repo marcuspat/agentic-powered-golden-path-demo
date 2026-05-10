@@ -1,26 +1,74 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{appName}}
+  name: {{ appName }}
+  namespace: {{ namespace | default(appName) }}
   labels:
-    app: {{appName}}
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+    app.kubernetes.io/version: "0.1.0"
 spec:
-  replicas: 1
+  replicas: {{ replicas | default(2) }}
   selector:
     matchLabels:
-      app: {{appName}}
+      app.kubernetes.io/name: {{ appName }}
   template:
     metadata:
       labels:
-        app: {{appName}}
+        app.kubernetes.io/name: {{ appName }}
+        app.kubernetes.io/managed-by: golden-path-agent
+        app.kubernetes.io/version: "0.1.0"
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
       containers:
-      - name: {{appName}}
-        image: gcr.io/google-samples/hello-app:1.0
-        ports:
-        - containerPort: 8080
-        env:
-        - name: PORT
-          value: "8080"
-        - name: APP_NAME
-          value: {{appName}}
+        - name: {{ appName }}
+          image: {{ image | default("ghcr.io/cnoe-io/nodejs-hello:latest") }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "8080"
+            - name: APP_NAME
+              value: {{ appName }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ appName }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.observability.svc.cluster.local:4318
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL

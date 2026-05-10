@@ -1,0 +1,81 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: {{ appName }}-build
+  labels:
+    app.kubernetes.io/name: {{ appName }}
+    app.kubernetes.io/managed-by: golden-path-agent
+spec:
+  description: >-
+    Source -> test -> image build/push -> GitOps image bump.
+    Final stage commits the new tag to the {{ appName }}-gitops repo,
+    which ArgoCD then reconciles into the cluster.
+  params:
+    - name: repo-url
+      type: string
+      description: Git URL of the source repo to clone.
+    - name: revision
+      type: string
+      default: main
+      description: Git revision to build.
+    - name: image
+      type: string
+      description: Fully-qualified image reference to build, e.g. ghcr.io/org/{{ appName }}:abc123.
+    - name: gitops-repo-url
+      type: string
+      description: Git URL of the paired *-gitops repo to bump.
+  workspaces:
+    - name: source
+      description: Shared workspace for source checkout and build context.
+    - name: gitops
+      description: Workspace for the GitOps repo clone in the bump stage.
+    - name: docker-credentials
+      description: Mounted registry credentials for kaniko (config.json).
+  tasks:
+    - name: fetch-source
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+      workspaces:
+        - name: output
+          workspace: source
+    - name: unit-test
+      runAfter:
+        - fetch-source
+      taskRef:
+        name: nodejs-unit-test
+      workspaces:
+        - name: source
+          workspace: source
+    - name: build-and-push
+      runAfter:
+        - unit-test
+      taskRef:
+        name: kaniko-build
+      params:
+        - name: image
+          value: $(params.image)
+      workspaces:
+        - name: source
+          workspace: source
+        - name: docker-credentials
+          workspace: docker-credentials
+    - name: bump-gitops
+      runAfter:
+        - build-and-push
+      taskRef:
+        name: bump-gitops
+      params:
+        - name: gitops-repo-url
+          value: $(params.gitops-repo-url)
+        - name: image
+          value: $(params.image)
+        - name: app-name
+          value: {{ appName }}
+      workspaces:
+        - name: gitops
+          workspace: gitops

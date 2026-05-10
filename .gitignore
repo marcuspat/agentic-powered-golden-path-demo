@@ -182,6 +182,9 @@ kubeconfig-*
 # Docker
 .dockerignore
 .dockerignore
+# Template files under cnoe-stacks/ are intentional; do not ignore them.
+!cnoe-stacks/**/.dockerignore
+!templates/**/.dockerignore
 
 # OS generated files
 .DS_Store
@@ -234,6 +237,11 @@ development/
 *api_key*
 *API_KEY*
 *secret*
+# Template manifests that REFERENCE secrets (ExternalSecret/SealedSecret CRs)
+# but do NOT contain plaintext credentials are intentional and safe to commit.
+!cnoe-stacks/**/externalsecret.yaml
+!cnoe-stacks/**/sealedsecret.yaml
+!docs/adr/0018-credential-management-approach.md
 *SECRET*
 *credentials*
 *CREDENTIALS*
