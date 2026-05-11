@@ -89,6 +89,22 @@ class PyGithubAdapter:
                 return RepositoryUrl.from_app(app_name, kind, self.owner)
             raise translated
 
+    def delete_repository(self, owner: str, name: str) -> None:
+        """Delete a GitHub repository. Destructive; no auto-rollback."""
+        self._ensure()
+        try:
+            assert self._client is not None
+            repo = self._client.get_repo(f"{owner}/{name}")
+            repo.delete()
+            logger.info("github.repo_deleted owner=%s name=%s", owner, name)
+        except Exception as exc:
+            translated = self._translate(exc)
+            cls = type(exc).__name__
+            if cls == "UnknownObjectException":
+                logger.info("github.repo_not_found owner=%s name=%s (treated as success)", owner, name)
+                return
+            raise translated
+
     @staticmethod
     def _translate(exc: BaseException) -> BaseException:
         # Inspect by class name so we don't import github at module level.

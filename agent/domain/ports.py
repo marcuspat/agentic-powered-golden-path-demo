@@ -104,10 +104,26 @@ class GitWorkingCopyPort(Protocol):
 class ArgoApplicationPort(Protocol):
     def register(self, app: "ArgoApplication") -> None: ...                                         # type: ignore[name-defined]
     def get(self, app_name: AppName) -> Optional["ArgoApplication"]: ...                            # type: ignore[name-defined]
+    def remove(self, app_name: AppName) -> None: ...
 
 
 class KubernetesApplyPort(Protocol):
     def apply(self, manifest_yaml: str, *, namespace: Optional[Namespace] = None) -> None: ...
+
+
+class KubernetesReadPort(Protocol):
+    def get_json(self, resource: str, name: str, *, namespace: Optional[Namespace] = None) -> dict: ...
+    def delete(self, resource: str, name: str, *, namespace: Optional[Namespace] = None, ignore_not_found: bool = True) -> None: ...
+
+
+class ArgoApplicationProjectionPort(Protocol):
+    """Read-only projection of a live ArgoCD Application's status.
+
+    Translates raw ArgoCD CR status fields through the BC-5 ACL into
+    domain ``SyncStatus`` / ``HealthStatus`` enums.
+    """
+
+    def project(self, app_name: AppName) -> Optional["ArgoApplication"]: ...   # type: ignore[name-defined]
 
 
 # --------------------------------------------------------------------------- #

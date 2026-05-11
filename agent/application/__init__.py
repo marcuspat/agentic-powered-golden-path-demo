@@ -1,4 +1,10 @@
 """Application services."""
+from agent.application.cleanup import (
+    CleanupApplicationService,
+    CleanupCommand,
+    CleanupResult,
+    RepositoryDeleterPort,
+)
 from agent.application.onboarding import (
     OnboardingApplicationService,
     OnboardingCommand,
@@ -11,9 +17,13 @@ from agent.application.rollback import (
 )
 
 __all__ = [
+    "CleanupApplicationService",
+    "CleanupCommand",
+    "CleanupResult",
     "OnboardingApplicationService",
     "OnboardingCommand",
     "OnboardingResult",
+    "RepositoryDeleterPort",
     "RollbackApplicationService",
     "RollbackCommand",
     "RollbackResult",
