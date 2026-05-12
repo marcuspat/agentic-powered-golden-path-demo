@@ -16,7 +16,7 @@ SCRIPTS   := $(REPO_ROOT)/scripts
 
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap lint typecheck test test-unit test-integration test-e2e test-perf test-security test-all validate bench clean agent-cli
+.PHONY: help bootstrap lint typecheck test test-unit test-integration test-e2e test-perf test-security secret-scan test-all validate bench clean agent-cli
 
 help:  ## Show this help (default target).
 	@awk 'BEGIN {FS = ":.*?## "; printf "Golden Path Make targets:\n\n"} \
@@ -50,6 +50,9 @@ test-perf:  ## Run only the performance tier (Tier 4).
 
 test-security:  ## Run only the security tier (Tier 5).
 	$(PYTEST) tests/security -q
+
+secret-scan:  ## Standalone credential scan over cnoe-stacks/ and agent/.
+	$(PYTHON) -m tests.security._scanner_cli
 
 test-all:  ## lint + typecheck + test + test-security; the release gate.
 	$(MAKE) lint

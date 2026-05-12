@@ -72,8 +72,22 @@ lerna-debug.log*
 *.crt
 *.p12
 *.pfx
+*.pkcs12
+*.kubeconfig
+kubeconfig
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_dsa
+*.gpg
+*.asc
+*.jks
+*.keystore
+*.truststore
 secrets/
 .secrets/
+.env
 .env.local
 .env.production
 .env.staging
@@ -237,16 +251,37 @@ development/
 *api_key*
 *API_KEY*
 *secret*
-# Template manifests that REFERENCE secrets (ExternalSecret/SealedSecret CRs)
-# but do NOT contain plaintext credentials are intentional and safe to commit.
-!cnoe-stacks/**/externalsecret.yaml
-!cnoe-stacks/**/sealedsecret.yaml
-!docs/adr/0018-credential-management-approach.md
 *SECRET*
 *credentials*
 *CREDENTIALS*
+.netrc
+.npmrc
+.pypirc
+.dockercfg
+docker-config.json
 ghp_*
+github_pat_*
+sk-*
 sk-or-v1-*
+AKIA*
+*.token
+*.kubeconfig
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+# Carve-outs — files that REFERENCE but do not CONTAIN plaintext
+# credentials. ExternalSecret/SealedSecret CRs only carry references to
+# an external store and are safe (in fact, required) to commit.
+!cnoe-stacks/**/externalsecret.yaml
+!cnoe-stacks/**/sealedsecret.yaml
+!config/**/externalsecret.yaml
+!config/**/sealedsecret.yaml
+# Test files that SCAN FOR credentials (do not contain real ones).
+!tests/**/*secret*
+!tests/**/*credentials*
+!tests/**/_scanner*.py
+!docs/adr/0018-credential-management-approach.md
 *.key
 *.pem
 
