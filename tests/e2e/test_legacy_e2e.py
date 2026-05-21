@@ -141,8 +141,8 @@ class TestE2EWorkflow(unittest.TestCase):
             "Add GitOps configuration"
         )
 
-        print(f"✅ Populated source repository from template")
-        print(f"✅ Populated GitOps repository from template")
+        print("✅ Populated source repository from template")
+        print("✅ Populated GitOps repository from template")
 
     def test_03_argocd_application_creation(self):
         """Test 3: ArgoCD application creation"""

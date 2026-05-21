@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from agent.domain.values import (
     AppName,
     CommitMessage,
     GitSha,
-    RepoStatus,
     RepositoryUrl,
+    RepoStatus,
     Timestamp,
 )
 
@@ -20,11 +19,11 @@ class SourceRepository:
     url: RepositoryUrl
     created_at: Timestamp
     status: RepoStatus = RepoStatus.EMPTY
-    initial_commit: Optional[CommitMessage] = None
-    initial_sha: Optional[GitSha] = None
+    initial_commit: CommitMessage | None = None
+    initial_sha: GitSha | None = None
 
     @classmethod
-    def newly_created(cls, app_name: AppName, url: RepositoryUrl) -> "SourceRepository":
+    def newly_created(cls, app_name: AppName, url: RepositoryUrl) -> SourceRepository:
         return cls(app_name=app_name, url=url, created_at=Timestamp.now())
 
     def mark_populated(self, message: CommitMessage, sha: GitSha) -> None:

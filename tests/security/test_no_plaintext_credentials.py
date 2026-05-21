@@ -25,11 +25,9 @@ See ADR-0014 (env-var configuration) and ADR-0018 (credential management).
 
 from __future__ import annotations
 
-import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -80,7 +78,7 @@ def rendered_stack(tmp_path: Path, repo_root: Path) -> Path:
         "agent.domain.services.template_rendering",
         reason="template renderer not landed",
     )
-    values_mod = pytest.importorskip(
+    pytest.importorskip(
         "agent.domain.values", reason="agent.domain.values not landed"
     )
 
@@ -128,7 +126,7 @@ def test_no_plaintext_credentials_in_rendered_templates(
 # ---------------------------------------------------------------------------
 
 
-def _git_tracked_files(repo_root: Path) -> List[Path]:
+def _git_tracked_files(repo_root: Path) -> list[Path]:
     if shutil.which("git") is None:
         return []
     proc = subprocess.run(
@@ -160,7 +158,7 @@ def test_no_plaintext_credentials_in_committed_tree(repo_root: Path) -> None:
         _is_documentation_path,
     )
 
-    findings: List[Finding] = []
+    findings: list[Finding] = []
     for path in tracked:
         if not path.is_file():
             continue

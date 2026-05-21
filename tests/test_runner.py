@@ -17,16 +17,11 @@ import logging
 import os
 import subprocess
 import sys
-import time
-import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+
 import requests
-import smtplib
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
 
 # Configure logging
 logging.basicConfig(
@@ -84,7 +79,7 @@ class TestRunner:
             }
         }
 
-    def _load_config(self, config_file: str) -> Dict:
+    def _load_config(self, config_file: str) -> dict:
         """Load test runner configuration"""
         default_config = {
             "execution": {
@@ -114,14 +109,14 @@ class TestRunner:
         }
 
         if config_file and Path(config_file).exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 user_config = json.load(f)
                 default_config.update(user_config)
 
         return default_config
 
-    def run_test_suite(self, suite_name: str, suite_config: Dict,
-                      environment: Dict = None) -> Dict:
+    def run_test_suite(self, suite_name: str, suite_config: dict,
+                      environment: dict = None) -> dict:
         """Execute a single test suite"""
         logger.info(f"Starting test suite: {suite_name}")
 
@@ -200,8 +195,8 @@ class TestRunner:
                 "critical": suite_config["critical"]
             }
 
-    def run_parallel_tests(self, test_suites: Dict[str, Dict],
-                          environment: Dict = None) -> List[Dict]:
+    def run_parallel_tests(self, test_suites: dict[str, dict],
+                          environment: dict = None) -> list[dict]:
         """Run multiple test suites in parallel"""
         logger.info(f"Running {len(test_suites)} test suites in parallel")
 
@@ -242,8 +237,8 @@ class TestRunner:
 
         return results
 
-    def run_sequential_tests(self, test_suites: Dict[str, Dict],
-                           environment: Dict = None) -> List[Dict]:
+    def run_sequential_tests(self, test_suites: dict[str, dict],
+                           environment: dict = None) -> list[dict]:
         """Run test suites sequentially"""
         logger.info(f"Running {len(test_suites)} test suites sequentially")
 
@@ -263,8 +258,8 @@ class TestRunner:
 
         return results
 
-    def retry_failed_tests(self, results: List[Dict],
-                          test_suites: Dict[str, Dict]) -> List[Dict]:
+    def retry_failed_tests(self, results: list[dict],
+                          test_suites: dict[str, dict]) -> list[dict]:
         """Retry failed test suites"""
         if not self.config["execution"]["retry_failed_tests"]:
             return results
@@ -306,7 +301,7 @@ class TestRunner:
 
         return results
 
-    def calculate_metrics(self, results: List[Dict]) -> Dict:
+    def calculate_metrics(self, results: list[dict]) -> dict:
         """Calculate test execution metrics"""
         total_suites = len(results)
         passed_suites = len([r for r in results if r["status"] == "PASSED"])
@@ -329,7 +324,7 @@ class TestRunner:
             "overall_status": "PASSED" if critical_failed == 0 and success_rate >= self.config["thresholds"]["min_success_rate"] else "FAILED"
         }
 
-    def generate_json_report(self, results: List[Dict], metrics: Dict) -> str:
+    def generate_json_report(self, results: list[dict], metrics: dict) -> str:
         """Generate JSON test report"""
         report = {
             "test_run": {
@@ -349,7 +344,7 @@ class TestRunner:
 
         return str(report_file)
 
-    def generate_html_report(self, results: List[Dict], metrics: Dict) -> str:
+    def generate_html_report(self, results: list[dict], metrics: dict) -> str:
         """Generate HTML test report"""
         html_template = """
 <!DOCTYPE html>
@@ -456,7 +451,7 @@ class TestRunner:
 
         return str(report_file)
 
-    def send_slack_notification(self, metrics: Dict, report_files: Dict):
+    def send_slack_notification(self, metrics: dict, report_files: dict):
         """Send test results to Slack"""
         webhook_url = self.config["notifications"]["slack_webhook_url"]
         if not webhook_url:
@@ -488,9 +483,9 @@ class TestRunner:
         except Exception as e:
             logger.error(f"Error sending Slack notification: {e}")
 
-    def execute_test_run(self, test_names: List[str] = None,
-                        environment: Dict = None,
-                        parallel: bool = True) -> Dict:
+    def execute_test_run(self, test_names: list[str] = None,
+                        environment: dict = None,
+                        parallel: bool = True) -> dict:
         """Execute complete test run"""
         logger.info("Starting Golden Path Demo Test Runner")
 
@@ -644,7 +639,7 @@ def main():
     # Load environment variables if provided
     environment = {}
     if args.env and Path(args.env).exists():
-        with open(args.env, 'r') as f:
+        with open(args.env) as f:
             environment = json.load(f)
 
     # Validate configuration before running tests

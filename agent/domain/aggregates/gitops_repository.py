@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 from agent.domain.values import (
     AppName,
@@ -10,8 +9,8 @@ from agent.domain.values import (
     GitSha,
     ManifestKind,
     Namespace,
-    RepoStatus,
     RepositoryUrl,
+    RepoStatus,
     Timestamp,
 )
 
@@ -23,9 +22,9 @@ class GitOpsRepository:
     created_at: Timestamp
     target_namespace: Namespace
     status: RepoStatus = RepoStatus.EMPTY
-    manifests: List[ManifestKind] = field(default_factory=list)
-    initial_commit: Optional[CommitMessage] = None
-    initial_sha: Optional[GitSha] = None
+    manifests: list[ManifestKind] = field(default_factory=list)
+    initial_commit: CommitMessage | None = None
+    initial_sha: GitSha | None = None
 
     @classmethod
     def newly_created(
@@ -33,7 +32,7 @@ class GitOpsRepository:
         app_name: AppName,
         url: RepositoryUrl,
         namespace: Namespace,
-    ) -> "GitOpsRepository":
+    ) -> GitOpsRepository:
         return cls(
             app_name=app_name,
             url=url,
@@ -45,7 +44,7 @@ class GitOpsRepository:
         self,
         message: CommitMessage,
         sha: GitSha,
-        manifests: List[ManifestKind],
+        manifests: list[ManifestKind],
     ) -> None:
         if self.status is RepoStatus.POPULATED:
             raise ValueError(f"GitOpsRepository {self.app_name} already populated")

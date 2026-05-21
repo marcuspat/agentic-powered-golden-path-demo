@@ -10,12 +10,11 @@ from __future__ import annotations
 
 import re
 import uuid
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
-from typing import FrozenSet, Optional
-
 
 # --------------------------------------------------------------------------- #
 # Slug-like identifiers
@@ -42,7 +41,7 @@ class AppName:
             raise ValueError(f"Invalid AppName: {self.value!r}")
 
     @classmethod
-    def from_raw(cls, raw: str) -> "AppName":
+    def from_raw(cls, raw: str) -> AppName:
         """Normalise an arbitrary string into a valid AppName.
 
         This is the *only* sanctioned sanitiser; both the LLM extraction path
@@ -81,7 +80,7 @@ class Namespace:
             raise ValueError(f"Invalid Namespace: {self.value!r}")
 
     @classmethod
-    def from_app(cls, app_name: AppName) -> "Namespace":
+    def from_app(cls, app_name: AppName) -> Namespace:
         """Project the app-name namespace convention (ADR-0017)."""
         return cls(app_name.value)
 
@@ -124,7 +123,7 @@ class AppDescription:
             raise ValueError("AppDescription too long (max 512 chars)")
 
     @classmethod
-    def for_app(cls, app_name: AppName) -> "AppDescription":
+    def for_app(cls, app_name: AppName) -> AppDescription:
         return cls(f"NodeJS application for {app_name.value}")
 
 
@@ -139,8 +138,8 @@ class Outcome:
     """Terminal outcome of an OnboardingRun (or PipelineRun)."""
 
     kind: OutcomeKind
-    reason: Optional[str] = None
-    failed_step: Optional[str] = None
+    reason: str | None = None
+    failed_step: str | None = None
 
     def __post_init__(self) -> None:
         if self.kind is OutcomeKind.FAILED:
@@ -148,20 +147,19 @@ class Outcome:
                 raise ValueError("Failed Outcome requires a reason")
             if not self.failed_step:
                 raise ValueError("Failed Outcome requires a failed_step")
-        if self.kind is OutcomeKind.SUCCEEDED:
-            if self.reason or self.failed_step:
-                raise ValueError("Succeeded Outcome must not carry reason/step")
+        if self.kind is OutcomeKind.SUCCEEDED and (self.reason or self.failed_step):
+            raise ValueError("Succeeded Outcome must not carry reason/step")
 
     @classmethod
-    def succeeded(cls) -> "Outcome":
+    def succeeded(cls) -> Outcome:
         return cls(OutcomeKind.SUCCEEDED)
 
     @classmethod
-    def failed(cls, reason: str, failed_step: str) -> "Outcome":
+    def failed(cls, reason: str, failed_step: str) -> Outcome:
         return cls(OutcomeKind.FAILED, reason=reason, failed_step=failed_step)
 
     @classmethod
-    def cancelled(cls, reason: Optional[str] = None) -> "Outcome":
+    def cancelled(cls, reason: str | None = None) -> Outcome:
         # Cancelled is allowed without reason, but step is optional.
         return cls(OutcomeKind.CANCELLED, reason=reason, failed_step=None)
 
@@ -177,7 +175,7 @@ class ExtractedIntent:
     """Structured result of intent extraction."""
 
     app_name: AppName
-    stack: "StackName"
+    stack: StackName
     description: AppDescription
     extraction_path: ExtractionPath
 
@@ -210,7 +208,7 @@ class CorrelationId:
             )
 
     @classmethod
-    def new(cls) -> "CorrelationId":
+    def new(cls) -> CorrelationId:
         return cls(str(uuid.uuid4()))
 
     def __str__(self) -> str:
@@ -230,7 +228,7 @@ class Timestamp:
             raise ValueError("Timestamp must be timezone-aware (UTC)")
 
     @classmethod
-    def now(cls) -> "Timestamp":
+    def now(cls) -> Timestamp:
         return cls(datetime.now(tz=timezone.utc))
 
     def isoformat(self) -> str:
@@ -285,7 +283,7 @@ class TemplatePath:
 class TemplateVariableSet:
     """Frozen set of variable names declared by a Stack template."""
 
-    values: FrozenSet[str]
+    values: frozenset[str]
 
     def __post_init__(self) -> None:
         if not isinstance(self.values, frozenset):
@@ -297,7 +295,7 @@ class TemplateVariableSet:
     def __contains__(self, name: object) -> bool:
         return name in self.values
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self.values)
 
 
@@ -320,7 +318,7 @@ class RenderedFile:
         if not isinstance(self.content, (bytes, bytearray)):
             raise TypeError("RenderedFile.content must be bytes")
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[object]:
         yield self.relative_path
         yield self.content
 
@@ -347,8 +345,8 @@ class RepositoryUrl:
 
     @classmethod
     def from_app(
-        cls, app_name: "AppName", kind: str, owner: str
-    ) -> "RepositoryUrl":
+        cls, app_name: AppName, kind: str, owner: str
+    ) -> RepositoryUrl:
         """Build the canonical URL ``https://github.com/<owner>/<app>-<kind>.git``."""
         if kind not in ("source", "gitops"):
             raise ValueError(f"kind must be 'source' or 'gitops', got {kind!r}")

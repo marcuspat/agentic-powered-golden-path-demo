@@ -17,10 +17,9 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 from agent.domain.errors import DomainError
-from agent.domain.events import EventEnvelope, DomainEvent
+from agent.domain.events import DomainEvent, EventEnvelope
 from agent.domain.ports import (
     ArgoApplicationPort,
     EventEmitterPort,
@@ -44,7 +43,7 @@ class CleanupCommand:
     actor: ActorIdentity = ActorIdentity("operator@local")
     delete_repos: bool = False
     keep_namespace: bool = False
-    namespace: Optional[Namespace] = None
+    namespace: Namespace | None = None
 
 
 @dataclass(frozen=True)
@@ -52,9 +51,9 @@ class CleanupResult:
     correlation_id: CorrelationId
     app_name: AppName
     outcome: Outcome
-    steps_taken: List[str] = field(default_factory=list)
-    skipped: List[str] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
+    steps_taken: list[str] = field(default_factory=list)
+    skipped: list[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
 
     @property
     def succeeded(self) -> bool:
@@ -100,11 +99,11 @@ class CleanupApplicationService:
     def __init__(
         self,
         argo_repo: ArgoApplicationPort,
-        kubectl_read: Optional[KubernetesReadPort] = None,
-        repo_deleter: Optional[RepositoryDeleterPort] = None,
-        events: Optional[EventEmitterPort] = None,
+        kubectl_read: KubernetesReadPort | None = None,
+        repo_deleter: RepositoryDeleterPort | None = None,
+        events: EventEmitterPort | None = None,
         *,
-        github_owner: Optional[str] = None,
+        github_owner: str | None = None,
     ) -> None:
         self._argo = argo_repo
         self._kubectl = kubectl_read
@@ -114,9 +113,9 @@ class CleanupApplicationService:
 
     def cleanup(self, command: CleanupCommand) -> CleanupResult:
         correlation = CorrelationId.new()
-        steps: List[str] = []
-        skipped: List[str] = []
-        errors: List[str] = []
+        steps: list[str] = []
+        skipped: list[str] = []
+        errors: list[str] = []
         self._emit(
             correlation,
             OnboardedAppCleanupRequested(

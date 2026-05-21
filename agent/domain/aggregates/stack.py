@@ -33,7 +33,7 @@ class Stack:
         source_template_dir: Path,
         gitops_template_dir: Path,
         declared_variables: set,
-    ) -> "Stack":
+    ) -> Stack:
         return cls(
             name=StackName(name),
             version=StackVersion(version),

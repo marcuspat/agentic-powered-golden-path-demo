@@ -5,13 +5,13 @@ the domain never sees raw subprocess output or SDK exception classes.
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 from agent.domain.errors import K8sApplyError, Unauthorized
 from agent.domain.ports import KubernetesApplyPort, KubernetesReadPort
@@ -26,7 +26,7 @@ class KubectlAdapter(KubernetesApplyPort, KubernetesReadPort):
 
     # ----- apply ----- #
 
-    def apply(self, manifest_yaml: str, *, namespace: Optional[Namespace] = None) -> None:
+    def apply(self, manifest_yaml: str, *, namespace: Namespace | None = None) -> None:
         self._require_kubectl()
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".yaml", delete=False, prefix="gpagent-"
@@ -40,15 +40,13 @@ class KubectlAdapter(KubernetesApplyPort, KubernetesReadPort):
             self._run(args, op="apply")
             logger.info("kubectl.apply ok")
         finally:
-            try:
+            with contextlib.suppress(OSError):  # pragma: no cover
                 path.unlink()
-            except OSError:  # pragma: no cover
-                pass
 
     # ----- read ----- #
 
     def get_json(
-        self, resource: str, name: str, *, namespace: Optional[Namespace] = None
+        self, resource: str, name: str, *, namespace: Namespace | None = None
     ) -> dict:
         self._require_kubectl()
         args = [self._bin, "get", resource, name, "-o", "json"]
@@ -68,7 +66,7 @@ class KubectlAdapter(KubernetesApplyPort, KubernetesReadPort):
         resource: str,
         name: str,
         *,
-        namespace: Optional[Namespace] = None,
+        namespace: Namespace | None = None,
         ignore_not_found: bool = True,
     ) -> None:
         self._require_kubectl()

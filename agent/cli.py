@@ -20,7 +20,7 @@ import argparse
 import logging
 import os
 import sys
-from typing import List, Optional, Sequence
+from collections.abc import Sequence
 
 from agent import __version__
 from agent.application.cleanup import CleanupCommand, CleanupResult
@@ -84,12 +84,12 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
+def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = _build_parser()
     argv = list(argv) if argv is not None else sys.argv[1:]
     # Back-compat: bare string (no subcommand) → onboard.
     known = {"onboard", "cleanup"}
-    has_flag_only = all(a.startswith("-") for a in argv) if argv else False
+    all(a.startswith("-") for a in argv) if argv else False
     if argv and argv[0] not in known and not argv[0].startswith("-"):
         argv = ["onboard", *argv]
     args = parser.parse_args(argv)
@@ -102,7 +102,7 @@ def _parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
 # env-var validation
 # --------------------------------------------------------------------------- #
 
-def _missing(varnames: Sequence[str]) -> List[str]:
+def _missing(varnames: Sequence[str]) -> list[str]:
     return [v for v in varnames if not os.environ.get(v)]
 
 
@@ -110,7 +110,7 @@ def _missing(varnames: Sequence[str]) -> List[str]:
 # main
 # --------------------------------------------------------------------------- #
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     args = _parse_args(argv)
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),

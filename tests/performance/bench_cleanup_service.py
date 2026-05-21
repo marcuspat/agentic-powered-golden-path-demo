@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import timeit
 from statistics import mean
-from typing import Any
 
 import pytest
 

@@ -102,7 +102,7 @@ class SecurityScanner:
             "your_", "replace_", "enter_", "...", "___", "---", "???"
         ]
 
-        match_lower = match.lower()
+        match.lower()
         line_lower = line.lower()
 
         return any(indicator in line_lower for indicator in false_positive_indicators)

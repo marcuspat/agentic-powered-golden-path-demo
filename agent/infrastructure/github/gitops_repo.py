@@ -5,7 +5,6 @@ import logging
 import re
 import tempfile
 from pathlib import Path
-from typing import List
 
 from agent.domain.aggregates.gitops_repository import GitOpsRepository
 from agent.domain.ports import GitOpsRepositoryPort, GitWorkingCopyPort
@@ -44,7 +43,7 @@ class GitHubGitOpsRepoRepository(GitOpsRepositoryPort):
     def populate(
         self,
         repo: GitOpsRepository,
-        files: List[RenderedFile],
+        files: list[RenderedFile],
         message: CommitMessage,
         branch: BranchName = BranchName(),
     ) -> GitSha:
@@ -65,7 +64,7 @@ class GitHubGitOpsRepoRepository(GitOpsRepositoryPort):
 _KIND_RE = re.compile(rb"^kind:\s*([A-Za-z]+)\s*$", re.MULTILINE)
 
 
-def _scan_manifest_kinds(files: List[RenderedFile]) -> List[ManifestKind]:
+def _scan_manifest_kinds(files: list[RenderedFile]) -> list[ManifestKind]:
     kinds: list[ManifestKind] = []
     seen: set[str] = set()
     for f in files:

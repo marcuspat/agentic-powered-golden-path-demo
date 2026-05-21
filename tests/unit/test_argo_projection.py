@@ -21,7 +21,12 @@ argo_aggregate = pytest.importorskip(
     "agent.domain.aggregates.argo_application",
     reason="agent.domain.aggregates.argo_application not yet landed",
 )
+errors = pytest.importorskip(
+    "agent.domain.errors",
+    reason="agent.domain.errors not yet landed",
+)
 
+ExternalSystemError = errors.ExternalSystemError
 translate_sync_status = projection.translate_sync_status
 translate_health_status = projection.translate_health_status
 project_from_cr = projection.project_from_cr
@@ -144,7 +149,7 @@ def test_project_from_cr_handles_missing_sync_policy() -> None:
 def test_project_from_cr_rejects_missing_name() -> None:
     cr = _cr()
     del cr["metadata"]["name"]
-    with pytest.raises(Exception):
+    with pytest.raises(ExternalSystemError):
         project_from_cr(cr)
 
 

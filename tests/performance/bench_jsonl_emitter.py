@@ -90,7 +90,8 @@ def test_jsonl_emit_throughput_1k_events(tmp_path: Path) -> None:
     elapsed = timeit.default_timer() - start
     assert elapsed < 2.0, f"1000 emits took {elapsed:.3f}s (budget 2s)"
     # Verify all lines landed.
-    assert sum(1 for _ in open(log)) == 1000
+    with open(log) as fh:
+        assert sum(1 for _ in fh) == 1000
 
 
 def test_envelope_serialisation_is_O_n(benchmark=None) -> None:

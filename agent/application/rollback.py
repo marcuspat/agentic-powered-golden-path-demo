@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from agent.domain.errors import DomainError
 from agent.domain.events import EventEnvelope, GitOpsRepositoryRolledBack
@@ -18,7 +17,6 @@ from agent.domain.values import (
     CorrelationId,
     GitSha,
     Outcome,
-    OutcomeKind,
     RepositoryUrl,
 )
 
@@ -28,17 +26,17 @@ logger = logging.getLogger(__name__)
 @dataclass(frozen=True)
 class RollbackCommand:
     app_name: AppName
-    target_sha: Optional[GitSha] = None
+    target_sha: GitSha | None = None
     actor: ActorIdentity = ActorIdentity("operator@local")
     reason: str = "operator-initiated rollback"
-    gitops_owner: Optional[str] = None  # GitHub user/org
+    gitops_owner: str | None = None  # GitHub user/org
 
 
 @dataclass(frozen=True)
 class RollbackResult:
     app_name: AppName
-    new_head_sha: Optional[GitSha]
-    reverted_sha: Optional[GitSha]
+    new_head_sha: GitSha | None
+    reverted_sha: GitSha | None
     outcome: Outcome
     correlation_id: CorrelationId
 
@@ -47,9 +45,9 @@ class RollbackApplicationService:
     def __init__(
         self,
         git: GitWorkingCopyPort,
-        events: Optional[EventEmitterPort] = None,
+        events: EventEmitterPort | None = None,
         *,
-        default_owner: Optional[str] = None,
+        default_owner: str | None = None,
     ) -> None:
         self._git = git
         self._events = events

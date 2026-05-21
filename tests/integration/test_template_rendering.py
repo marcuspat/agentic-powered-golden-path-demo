@@ -21,6 +21,11 @@ template_rendering = pytest.importorskip(
     "agent.domain.services.template_rendering",
     reason="agent.domain.services.template_rendering not yet landed",
 )
+errors = pytest.importorskip(
+    "agent.domain.errors",
+    reason="agent.domain.errors not yet landed",
+)
+TemplateRenderError = errors.TemplateRenderError
 TemplateRenderingService = template_rendering.TemplateRenderingService
 AppName = values.AppName
 AppDescription = values.AppDescription
@@ -32,7 +37,7 @@ TemplateVariables = values.TemplateVariables
 pytestmark = pytest.mark.integration
 
 
-def _vars(app: str = "demo-app") -> "TemplateVariables":
+def _vars(app: str = "demo-app") -> TemplateVariables:
     name = AppName(app)
     return TemplateVariables(
         app_name=name,
@@ -89,7 +94,7 @@ def test_render_substitutes_app_name_into_outputs(stack_dir: Path) -> None:
 def test_render_rejects_missing_directory(tmp_workspace: Path) -> None:
     """Non-existent template_dir must raise a TemplateRenderError."""
     service = TemplateRenderingService()
-    with pytest.raises(Exception):
+    with pytest.raises(TemplateRenderError):
         service.render(template_dir=tmp_workspace / "nope", variables=_vars())
 
 

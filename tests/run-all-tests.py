@@ -4,15 +4,16 @@ Golden Path Demo - Comprehensive Test Runner
 Executes all test suites with detailed reporting and metrics
 """
 
-import os
-import sys
-import json
-import subprocess
-import time
 import argparse
+import json
+import os
+import subprocess
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Optional
+
 
 class TestRunner:
     """Comprehensive test runner for Golden Path Demo"""
@@ -24,7 +25,7 @@ class TestRunner:
         self.project_root = Path(__file__).parent.parent
         self.tests_dir = Path(__file__).parent
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all test suites and return comprehensive results"""
         print("=" * 80)
         print("Golden Path Demo - Comprehensive Test Suite")
@@ -105,7 +106,7 @@ class TestRunner:
         # Generate final report
         return self.generate_final_report()
 
-    def run_test_suite(self, suite: Dict[str, Any]) -> None:
+    def run_test_suite(self, suite: dict[str, Any]) -> None:
         """Run a single test suite"""
         print(f"Running: {suite['name']}")
         print(f"Description: {suite['description']}")
@@ -156,7 +157,7 @@ class TestRunner:
 
         print()
 
-    def record_test_result(self, suite: Dict[str, Any], status: str, duration: float,
+    def record_test_result(self, suite: dict[str, Any], status: str, duration: float,
                           exit_code: int, error_message: Optional[str] = None) -> None:
         """Record test result"""
         result = {
@@ -174,7 +175,7 @@ class TestRunner:
 
         self.test_results.append(result)
 
-    def generate_final_report(self) -> Dict[str, Any]:
+    def generate_final_report(self) -> dict[str, Any]:
         """Generate comprehensive final report"""
         end_time = datetime.now()
         total_duration = (end_time - self.start_time).total_seconds()
@@ -233,7 +234,7 @@ class TestRunner:
 
         return report
 
-    def get_category_results(self, category: str) -> Dict[str, Any]:
+    def get_category_results(self, category: str) -> dict[str, Any]:
         """Get results for a specific test category"""
         category_tests = [r for r in self.test_results if r["type"] == category]
         passed = len([r for r in category_tests if r["status"] == "passed"])
@@ -247,7 +248,7 @@ class TestRunner:
             "tests": category_tests
         }
 
-    def generate_recommendations(self, success_rate: float, critical_success_rate: float) -> List[str]:
+    def generate_recommendations(self, success_rate: float, critical_success_rate: float) -> list[str]:
         """Generate recommendations based on test results"""
         recommendations = []
 
@@ -286,7 +287,7 @@ class TestRunner:
         else:
             return "NO-GO"
 
-    def print_summary(self, report: Dict[str, Any]) -> None:
+    def print_summary(self, report: dict[str, Any]) -> None:
         """Print test summary"""
         print("=" * 80)
         print("TEST EXECUTION SUMMARY")
@@ -317,13 +318,13 @@ class TestRunner:
         # Go/No-Go
         go_no_go = report["go_no_go"]
         if go_no_go == "GO":
-            print(f"\n🟢 GO - System ready for demonstration")
+            print("\n🟢 GO - System ready for demonstration")
         elif go_no_go == "CAUTION":
-            print(f"\n🟡 CAUTION - System ready with minor issues")
+            print("\n🟡 CAUTION - System ready with minor issues")
         else:
-            print(f"\n🔴 NO-GO - System not ready for demonstration")
+            print("\n🔴 NO-GO - System not ready for demonstration")
 
-    def save_report(self, report: Dict[str, Any]) -> None:
+    def save_report(self, report: dict[str, Any]) -> None:
         """Save test report to file"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = f"/tmp/golden-path-test-report-{timestamp}.json"

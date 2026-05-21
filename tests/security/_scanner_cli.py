@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import List
 
 from tests.security._scanner import (
     Finding,
@@ -24,7 +23,7 @@ from tests.security._scanner import (
 )
 
 
-def _print_findings(findings: List[Finding]) -> None:
+def _print_findings(findings: list[Finding]) -> None:
     hard = hard_findings(findings)
     soft = [f for f in findings if f.pattern.startswith("docpath:")]
     if soft:
@@ -37,7 +36,7 @@ def _print_findings(findings: List[Finding]) -> None:
             print(f"  {f.path}:{f.lineno} [{f.pattern}] {f.snippet}", file=sys.stderr)
 
 
-def main(argv: List[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     if argv and argv[0] in ("-h", "--help"):
         print(__doc__)

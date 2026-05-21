@@ -8,14 +8,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional
 
 from agent.domain.values import (
     AppName,
     CorrelationId,
     OnboardingRequest,
     Outcome,
-    OutcomeKind,
     StackName,
     Timestamp,
 )
@@ -38,9 +36,9 @@ class RunPhase(str, Enum):
 class OnboardingStep:
     name: str
     status: StepStatus = StepStatus.PENDING
-    started_at: Optional[Timestamp] = None
-    completed_at: Optional[Timestamp] = None
-    failure_reason: Optional[str] = None
+    started_at: Timestamp | None = None
+    completed_at: Timestamp | None = None
+    failure_reason: str | None = None
 
     def begin(self) -> None:
         if self.status is not StepStatus.PENDING:
@@ -67,19 +65,19 @@ class OnboardingRun:
     correlation_id: CorrelationId
     request: OnboardingRequest
     started_at: Timestamp
-    extracted_app_name: Optional[AppName] = None
-    selected_stack: Optional[StackName] = None
-    steps: List[OnboardingStep] = field(default_factory=list)
-    outcome: Optional[Outcome] = None
-    completed_at: Optional[Timestamp] = None
-    source_repo_url: Optional[str] = None
-    gitops_repo_url: Optional[str] = None
-    namespace: Optional[str] = None
+    extracted_app_name: AppName | None = None
+    selected_stack: StackName | None = None
+    steps: list[OnboardingStep] = field(default_factory=list)
+    outcome: Outcome | None = None
+    completed_at: Timestamp | None = None
+    source_repo_url: str | None = None
+    gitops_repo_url: str | None = None
+    namespace: str | None = None
 
     # ----- factories ----- #
 
     @classmethod
-    def begin(cls, request: OnboardingRequest) -> "OnboardingRun":
+    def begin(cls, request: OnboardingRequest) -> OnboardingRun:
         return cls(
             correlation_id=CorrelationId.new(),
             request=request,
@@ -101,13 +99,13 @@ class OnboardingRun:
         return self.outcome is not None
 
     @property
-    def duration_seconds(self) -> Optional[float]:
+    def duration_seconds(self) -> float | None:
         if self.completed_at is None:
             return None
         delta = self.completed_at.value - self.started_at.value
         return delta.total_seconds()
 
-    def find_step(self, name: str) -> Optional[OnboardingStep]:
+    def find_step(self, name: str) -> OnboardingStep | None:
         return next((s for s in self.steps if s.name == name), None)
 
     # ----- mutations ----- #
@@ -156,7 +154,7 @@ class OnboardingRun:
         self.outcome = Outcome.failed(reason=reason, failed_step=failed_step)
         self.completed_at = Timestamp.now()
 
-    def cancel(self, reason: Optional[str] = None) -> None:
+    def cancel(self, reason: str | None = None) -> None:
         if self.is_terminal:
             raise ValueError("Run is already terminal")
         self.outcome = Outcome.cancelled(reason)

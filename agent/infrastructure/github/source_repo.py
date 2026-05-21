@@ -4,7 +4,6 @@ from __future__ import annotations
 import logging
 import tempfile
 from pathlib import Path
-from typing import List
 
 from agent.domain.aggregates.source_repository import SourceRepository
 from agent.domain.ports import GitWorkingCopyPort, SourceRepositoryPort
@@ -37,7 +36,7 @@ class GitHubSourceRepoRepository(SourceRepositoryPort):
     def populate(
         self,
         repo: SourceRepository,
-        files: List[RenderedFile],
+        files: list[RenderedFile],
         message: CommitMessage,
         branch: BranchName = BranchName(),
     ) -> GitSha:

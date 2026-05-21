@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Optional
+from typing import Any
 
 from agent.domain.errors import LlmUnavailable
 from agent.domain.ports import LlmCompletionPort
@@ -27,23 +27,23 @@ class OpenRouterAdapter(LlmCompletionPort):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         *,
         base_url: str = DEFAULT_BASE_URL,
-        model: Optional[str] = None,
+        model: str | None = None,
     ) -> None:
         self._api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
         self._base_url = base_url
         self._model = model or os.environ.get("OPENROUTER_MODEL", DEFAULT_MODEL)
-        self._client = None  # lazy
+        self._client: Any = None  # lazy
 
-    def _ensure_client(self):
+    def _ensure_client(self) -> Any:
         if self._client is not None:
             return self._client
         if not self._api_key:
             raise LlmUnavailable("OPENROUTER_API_KEY is not set")
         try:
-            import openai  # type: ignore[import-not-found]
+            import openai
         except ImportError as exc:
             raise LlmUnavailable("openai SDK not installed") from exc
         self._client = openai.OpenAI(api_key=self._api_key, base_url=self._base_url)

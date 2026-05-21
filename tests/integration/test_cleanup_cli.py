@@ -5,9 +5,6 @@ so the CLI is exercised end-to-end without touching kubectl or GitHub.
 """
 from __future__ import annotations
 
-import os
-from typing import List
-
 import pytest
 
 cli_mod = pytest.importorskip("agent.cli", reason="agent.cli not yet landed")
@@ -23,7 +20,7 @@ pytestmark = pytest.mark.integration
 
 class _FakeArgo:
     def __init__(self) -> None:
-        self.removed: List[str] = []
+        self.removed: list[str] = []
 
     def register(self, _app):  # pragma: no cover
         pass
@@ -37,7 +34,7 @@ class _FakeArgo:
 
 class _FakeKubectl:
     def __init__(self) -> None:
-        self.deleted: List = []
+        self.deleted: list = []
 
     def get_json(self, *_args, **_kwargs):  # pragma: no cover
         raise NotImplementedError
@@ -48,7 +45,7 @@ class _FakeKubectl:
 
 class _FakeRepoDeleter:
     def __init__(self) -> None:
-        self.deleted: List = []
+        self.deleted: list = []
 
     def delete(self, owner: str, name: str) -> None:
         self.deleted.append((owner, name))

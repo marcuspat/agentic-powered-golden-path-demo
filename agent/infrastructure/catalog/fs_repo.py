@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import List, Optional
 
 import yaml
 
@@ -36,10 +35,7 @@ class FilesystemStackRepository(StackRepositoryPort):
         src_dir = self._root / f"{name.value}-template"
         gitops_dir = self._root / f"{name.value}-gitops-template"
         # Some stacks store source files under an ``app-source/`` subfolder.
-        if (src_dir / "app-source").is_dir():
-            src_template_dir = src_dir / "app-source"
-        else:
-            src_template_dir = src_dir
+        src_template_dir = src_dir / "app-source" if (src_dir / "app-source").is_dir() else src_dir
         if not src_template_dir.is_dir() or not gitops_dir.is_dir():
             raise StackNotFound(
                 f"Stack {name.value!r} not found at {src_template_dir} / {gitops_dir}"
@@ -60,8 +56,8 @@ class FilesystemStackRepository(StackRepositoryPort):
             gitops_template=GitOpsTemplate(TemplatePath(gitops_dir)),
         )
 
-    def list_all(self) -> List[Stack]:
-        results: List[Stack] = []
+    def list_all(self) -> list[Stack]:
+        results: list[Stack] = []
         if not self._root.exists():
             return results
         for entry in sorted(self._root.iterdir()):
@@ -77,7 +73,7 @@ class FilesystemStackRepository(StackRepositoryPort):
         return results
 
 
-def _load_stack_yaml(path: Path) -> Optional[dict]:
+def _load_stack_yaml(path: Path) -> dict | None:
     if not path.exists():
         return None
     try:

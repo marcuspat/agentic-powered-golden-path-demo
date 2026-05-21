@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 from agent.domain.errors import LlmUnavailable
 from agent.domain.ports import LlmCompletionPort
@@ -62,16 +61,16 @@ class IntentExtractionService:
 
     def __init__(
         self,
-        llm: Optional[LlmCompletionPort] = None,
+        llm: LlmCompletionPort | None = None,
         *,
         default_stack: StackName = DEFAULT_STACK,
-        default_app_name: Optional[AppName] = DEFAULT_APP_NAME,
+        default_app_name: AppName | None = DEFAULT_APP_NAME,
     ) -> None:
         self._llm = llm
         self._default_stack = default_stack
         self._default_app_name = default_app_name
 
-    def extract(self, request) -> ExtractedIntent:
+    def extract(self, request: OnboardingRequest | str) -> ExtractedIntent:
         # Boundary tolerance: accept raw str or OnboardingRequest.
         text = request.text if hasattr(request, "text") else str(request)
 
@@ -122,7 +121,7 @@ class IntentExtractionService:
         )
 
 
-def _try_regex(text: str) -> Optional[AppName]:
+def _try_regex(text: str) -> AppName | None:
     for pattern in _FALLBACK_PATTERNS:
         m = re.search(pattern, text, re.IGNORECASE)
         if m:

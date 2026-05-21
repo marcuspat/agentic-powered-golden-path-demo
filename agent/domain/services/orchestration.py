@@ -2,15 +2,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from agent.domain.aggregates.argo_application import ArgoApplication
-from agent.domain.aggregates.gitops_repository import GitOpsRepository
 from agent.domain.aggregates.onboarding_run import OnboardingRun
-from agent.domain.aggregates.source_repository import SourceRepository
 from agent.domain.errors import DomainError
 from agent.domain.events import (
     ArgoApplicationRegistered,
+    DomainEvent,
     EventEnvelope,
     GitOpsRepositoryCreated,
     GitOpsRepositoryPopulated,
@@ -31,6 +29,7 @@ from agent.domain.ports import (
     TemplateRendererPort,
 )
 from agent.domain.values import (
+    AppDescription,
     AppName,
     CommitMessage,
     IngressHost,
@@ -62,7 +61,7 @@ class OnboardingOrchestrationService:
         source_repo: SourceRepositoryPort,
         gitops_repo: GitOpsRepositoryPort,
         argo_repo: ArgoApplicationPort,
-        events: Optional[EventEmitterPort] = None,
+        events: EventEmitterPort | None = None,
         ingress_suffix: str = "cnoe.localtest.me",
     ) -> None:
         self._intent_extraction = intent_extraction
@@ -202,7 +201,7 @@ class OnboardingOrchestrationService:
 
     # ----- helpers ----- #
 
-    def _build_variables(self, app_name: AppName, description) -> TemplateVariables:
+    def _build_variables(self, app_name: AppName, description: AppDescription) -> TemplateVariables:
         ns = Namespace.from_app(app_name)
         host = IngressHost(f"{app_name.value}.{self._ingress_suffix}")
         return TemplateVariables(
@@ -212,7 +211,7 @@ class OnboardingOrchestrationService:
             host=host,
         )
 
-    def _emit(self, run: OnboardingRun, event) -> None:
+    def _emit(self, run: OnboardingRun, event: DomainEvent) -> None:
         if self._events is None:
             return
         try:
@@ -222,7 +221,7 @@ class OnboardingOrchestrationService:
             logger.exception("event.emit_failed name=%s", event.name)
 
 
-def _last_failed_step(run: OnboardingRun) -> Optional[str]:
+def _last_failed_step(run: OnboardingRun) -> str | None:
     for step in reversed(run.steps):
         if step.status.value == "failed":
             return step.name
@@ -232,7 +231,7 @@ def _last_failed_step(run: OnboardingRun) -> Optional[str]:
     return None
 
 
-def _ingress_url(app_name: Optional[AppName], suffix: str) -> str:
+def _ingress_url(app_name: AppName | None, suffix: str) -> str:
     if app_name is None:
         return ""
     return f"http://{app_name.value}.{suffix}"

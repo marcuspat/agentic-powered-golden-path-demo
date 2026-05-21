@@ -9,7 +9,6 @@ Combines:
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 import yaml
 
@@ -19,7 +18,7 @@ from agent.domain.ports import (
     KubernetesApplyPort,
     KubernetesReadPort,
 )
-from agent.domain.values import AppName, Namespace
+from agent.domain.values import AppName
 from agent.infrastructure.k8s.argo_projection import (
     ARGOCD_NAMESPACE,
     KubectlArgoApplicationProjectionService,
@@ -32,7 +31,7 @@ class KubernetesArgoApplicationRepository(ArgoApplicationPort):
     def __init__(
         self,
         kubectl_apply: KubernetesApplyPort,
-        kubectl_read: Optional[KubernetesReadPort] = None,
+        kubectl_read: KubernetesReadPort | None = None,
     ) -> None:
         self._apply = kubectl_apply
         # The read port is optional so legacy call sites still work; if it is
@@ -52,7 +51,7 @@ class KubernetesArgoApplicationRepository(ArgoApplicationPort):
         )
         self._apply.apply(rendered)
 
-    def get(self, app_name: AppName) -> Optional[ArgoApplication]:
+    def get(self, app_name: AppName) -> ArgoApplication | None:
         if self._projection is None:
             return None
         return self._projection.project(app_name)

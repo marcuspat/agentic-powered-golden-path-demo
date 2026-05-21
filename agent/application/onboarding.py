@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Optional
 
 from agent.domain.aggregates.onboarding_run import OnboardingRun
 from agent.domain.errors import DomainError
@@ -36,12 +35,12 @@ class OnboardingCommand:
 class OnboardingResult:
     correlation_id: CorrelationId
     outcome: Outcome
-    app_name: Optional[str]
-    source_repo_url: Optional[str]
-    gitops_repo_url: Optional[str]
-    argo_application_name: Optional[str]
-    namespace: Optional[str]
-    ingress_url: Optional[str]
+    app_name: str | None
+    source_repo_url: str | None
+    gitops_repo_url: str | None
+    argo_application_name: str | None
+    namespace: str | None
+    ingress_url: str | None
     duration_seconds: float
 
     @property

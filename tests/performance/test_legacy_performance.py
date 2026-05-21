@@ -132,7 +132,7 @@ class PerformanceTestSuite:
                 logger.debug(f"Iteration {i+1}: {execution_time:.3f}s")
 
             except subprocess.TimeoutExpired:
-                error_messages.append(f"Command timed out after 30 seconds")
+                error_messages.append("Command timed out after 30 seconds")
             except Exception as e:
                 error_messages.append(str(e))
 
@@ -346,7 +346,7 @@ class PerformanceTestSuite:
             logger.warning("No baseline file found for comparison")
             return {"baseline_available": False}
 
-        with open(self.baseline_file, 'r') as f:
+        with open(self.baseline_file) as f:
             baseline = json.load(f)
 
         comparison = {
@@ -442,7 +442,7 @@ class PerformanceTestSuite:
         # Generate overall summary
         results["summary"] = {
             "test_timestamp": datetime.now().isoformat(),
-            "total_tests": len([k for k in results.keys() if k != "summary"]),
+            "total_tests": len([k for k in results if k != "summary"]),
             "system_info": {
                 "cpu_count": psutil.cpu_count(),
                 "memory_gb": psutil.virtual_memory().total / (1024**3),

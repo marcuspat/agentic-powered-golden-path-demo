@@ -5,14 +5,14 @@ Tests for the AI onboarding agent including GitHub integration,
 template population, and ArgoCD deployment
 """
 
-import unittest
-import os
-import tempfile
-import shutil
+import contextlib
 import json
-from unittest.mock import Mock, patch, MagicMock
+import os
+import shutil
 import subprocess
-import sys
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
 
 # Mock the required modules if they're not available
 try:
@@ -70,22 +70,22 @@ class TestOnboardingAgent(unittest.TestCase):
 
         # Mock deployment manifest
         with open(os.path.join(self.gitops_template_path, 'deployment.yaml'), 'w') as f:
-            f.write(f'''apiVersion: apps/v1
+            f.write('''apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{{{.Values.appName}}}}
+  name: {{.Values.appName}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{{{.Values.appName}}}}
+      app: {{.Values.appName}}
   template:
     metadata:
       labels:
-        app: {{{{.Values.appName}}}}
+        app: {{.Values.appName}}
     spec:
       containers:
-      - name: {{{{.Values.appName}}}}
+      - name: {{.Values.appName}}
         image: nginx:alpine
         ports:
         - containerPort: 80''')
@@ -108,7 +108,7 @@ spec:
         required_vars = ['GITHUB_TOKEN', 'OPENAI_API_KEY', 'GITHUB_USERNAME']
         for var in required_vars:
             if not os.getenv(var):
-                raise EnvironmentError(f"Missing required environment variable: {var}")
+                raise OSError(f"Missing required environment variable: {var}")
         return True
 
     def test_missing_environment_variables(self):
@@ -171,7 +171,7 @@ spec:
             gitops_repo = user.create_repo(f"{app_name}-gitops")
 
             return repo.clone_url, gitops_repo.clone_url
-        except Exception as e:
+        except Exception:
             # Fallback for testing
             username = os.getenv("GITHUB_USERNAME")
             return f"https://github.com/{username}/{app_name}-source.git", \
@@ -211,7 +211,7 @@ spec:
             ["git", "-C", temp_repo_path, "push"]
         ]
 
-        for cmd in commands:
+        for _cmd in commands:
             # Mock successful execution
             pass
 
@@ -266,10 +266,8 @@ spec:
             f.write(app_manifest)
 
         # Mock kubectl apply
-        try:
+        with contextlib.suppress(Exception):
             subprocess.run(["kubectl", "apply", "-f", manifest_file], check=True)
-        except:
-            pass
 
     def test_manifest_generation(self):
         """Test ArgoCD manifest generation"""
@@ -364,7 +362,7 @@ class OnboardingAgent:
         required_vars = ['GITHUB_TOKEN', 'OPENAI_API_KEY', 'GITHUB_USERNAME']
         for var in required_vars:
             if not os.getenv(var):
-                raise EnvironmentError(f"Missing required environment variable: {var}")
+                raise OSError(f"Missing required environment variable: {var}")
         return True
 
     def validate_app_name(self, app_name):

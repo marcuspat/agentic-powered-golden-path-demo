@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import asdict, dataclass, field
-from typing import Any, Optional
+from typing import Any, cast
 
 from agent.domain.values import (
     AppName,
@@ -22,7 +22,6 @@ from agent.domain.values import (
     RepositoryUrl,
     Timestamp,
 )
-
 
 # --------------------------------------------------------------------------- #
 # Envelope
@@ -35,19 +34,19 @@ class EventEnvelope:
     version: int
     occurred_at: str
     correlation_id: str
-    causation_id: Optional[str]
+    causation_id: str | None
     producer: str
     payload: dict
 
     @classmethod
     def wrap(
         cls,
-        event: "DomainEvent",
+        event: DomainEvent,
         *,
         correlation_id: CorrelationId,
         producer: str = "agent",
-        causation_id: Optional[str] = None,
-    ) -> "EventEnvelope":
+        causation_id: str | None = None,
+    ) -> EventEnvelope:
         return cls(
             id=str(uuid.uuid4()),
             name=event.name,
@@ -77,8 +76,9 @@ class DomainEvent:
     def to_payload(self) -> dict:
         # Subclasses may override; the default just turns the dataclass into a dict.
         d = {k: v for k, v in asdict(self).items() if k not in {"name", "version"}}
-        # Convert known value-objects to primitives.
-        return _coerce_payload(d)
+        # Convert known value-objects to primitives. A dict in always yields a
+        # dict out, so the cast is safe.
+        return cast(dict, _coerce_payload(d))
 
 
 def _coerce_payload(value: Any) -> Any:
@@ -135,7 +135,7 @@ class OnboardingRunCompleted(DomainEvent):
 @dataclass(frozen=True)
 class OnboardingRunFailed(DomainEvent):
     name: str = field(default="OnboardingRun.Failed", init=False)
-    app_name: Optional[str] = None
+    app_name: str | None = None
     failed_step: str = "unknown"
     reason: str = ""
 

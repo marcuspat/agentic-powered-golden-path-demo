@@ -5,9 +5,8 @@ See ADR-0007 and ``docs/ddd/08-domain-services.md``.
 from __future__ import annotations
 
 import logging
-import os
 from pathlib import Path
-from typing import List
+from typing import Any
 
 import jinja2
 
@@ -32,7 +31,9 @@ class TemplateRenderingService:
             undefined=jinja2.StrictUndefined,
         )
 
-    def render(self, template_dir, variables) -> List[RenderedFile]:
+    def render(
+        self, template_dir: Path, variables: TemplateVariables | dict[str, Any]
+    ) -> list[RenderedFile]:
         root = Path(template_dir)
         if not root.exists():
             raise TemplateRenderError(f"Template directory does not exist: {root}")
@@ -40,15 +41,16 @@ class TemplateRenderingService:
             raise TemplateRenderError(f"Template path is not a directory: {root}")
 
         # Accept either a TemplateVariables value object or a plain dict.
-        if hasattr(variables, "to_dict"):
-            var_dict = variables.to_dict()
-        elif isinstance(variables, dict):
+        var_dict: dict[str, Any]
+        if isinstance(variables, dict):
             var_dict = dict(variables)
+        elif hasattr(variables, "to_dict"):
+            var_dict = variables.to_dict()
         else:
             raise TemplateRenderError(
                 f"variables must be TemplateVariables or dict, got {type(variables).__name__}"
             )
-        results: List[RenderedFile] = []
+        results: list[RenderedFile] = []
         for path in sorted(root.rglob("*")):
             if not path.is_file():
                 continue

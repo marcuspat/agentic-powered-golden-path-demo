@@ -8,7 +8,6 @@ that. No GitHub, no OpenRouter, no kubectl.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List, Optional
 
 import pytest
 
@@ -77,10 +76,10 @@ pytestmark = pytest.mark.integration
 
 
 class _InMemoryStackRepo:
-    def __init__(self, stack: "Stack") -> None:
+    def __init__(self, stack: Stack) -> None:
         self._stack = stack
 
-    def get(self, name: StackName) -> "Stack":  # type: ignore[name-defined]
+    def get(self, name: StackName) -> Stack:  # type: ignore[name-defined]
         return self._stack
 
     def list_all(self) -> list:
@@ -158,7 +157,7 @@ class _RecordingEmitter:
 
 
 @pytest.fixture
-def in_memory_stack(tmp_workspace: Path) -> "Stack":
+def in_memory_stack(tmp_workspace: Path) -> Stack:
     src = tmp_workspace / "src-template"
     gitops = tmp_workspace / "gitops-template"
     src.mkdir()
@@ -187,7 +186,7 @@ def in_memory_stack(tmp_workspace: Path) -> "Stack":
 
 
 def test_orchestration_runs_through_with_in_memory_ports(
-    in_memory_stack: "Stack",
+    in_memory_stack: Stack,
 ) -> None:
     extractor = IntentExtractionService(llm=None)
     stacks = _InMemoryStackRepo(in_memory_stack)

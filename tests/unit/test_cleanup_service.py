@@ -5,8 +5,6 @@ destructive actions, and that errors in one step do not stop the others.
 """
 from __future__ import annotations
 
-from typing import List, Optional, Tuple
-
 import pytest
 
 cleanup_mod = pytest.importorskip(
@@ -33,7 +31,7 @@ pytestmark = pytest.mark.unit
 
 class _FakeArgo:
     def __init__(self, fail: bool = False) -> None:
-        self.removed: List[AppName] = []
+        self.removed: list[AppName] = []
         self._fail = fail
 
     def register(self, _app):  # pragma: no cover — not used here
@@ -50,8 +48,8 @@ class _FakeArgo:
 
 
 class _FakeKubectl:
-    def __init__(self, fail_on: Optional[str] = None) -> None:
-        self.deleted: List[Tuple[str, str, Optional[str]]] = []
+    def __init__(self, fail_on: str | None = None) -> None:
+        self.deleted: list[tuple[str, str, str | None]] = []
         self._fail_on = fail_on
 
     def get_json(self, *_args, **_kwargs):  # pragma: no cover
@@ -65,8 +63,8 @@ class _FakeKubectl:
 
 
 class _FakeRepoDeleter:
-    def __init__(self, fail_on: Optional[str] = None) -> None:
-        self.deleted: List[Tuple[str, str]] = []
+    def __init__(self, fail_on: str | None = None) -> None:
+        self.deleted: list[tuple[str, str]] = []
         self._fail_on = fail_on
 
     def delete(self, owner: str, name: str) -> None:
@@ -78,7 +76,7 @@ class _FakeRepoDeleter:
 
 class _RecordingEmitter:
     def __init__(self) -> None:
-        self.events: List[str] = []
+        self.events: list[str] = []
 
     def emit(self, env) -> None:
         self.events.append(env.name)

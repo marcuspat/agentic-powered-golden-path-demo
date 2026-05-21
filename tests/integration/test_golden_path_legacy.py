@@ -60,7 +60,7 @@ class TestResult:
         self.start_time = datetime.now()
         logger.info(f"Starting test: {self.name}")
 
-    def end(self, passed: bool, error_message: str = None, details: Dict = None):
+    def end(self, passed: bool, error_message: str = None, details: dict = None):
         self.end_time = datetime.now()
         self.passed = passed
         self.error_message = error_message
@@ -74,7 +74,7 @@ class TestResult:
         if error_message:
             logger.error(f"Error: {error_message}")
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             'name': self.name,
             'description': self.description,
@@ -91,7 +91,7 @@ class GoldenPathTestSuite:
 
     def __init__(self, config_file: str = None):
         self.config = self._load_config(config_file)
-        self.test_results: List[TestResult] = []
+        self.test_results: list[TestResult] = []
         self.workspace_dir = Path("/workspaces/ai-powered-golden-path-demo")
         self.temp_dir = Path("/tmp/golden-path-tests")
         self.temp_dir.mkdir(exist_ok=True)
@@ -102,7 +102,7 @@ class GoldenPathTestSuite:
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.github_username = os.getenv("GITHUB_USERNAME")
 
-    def _load_config(self, config_file: str) -> Dict:
+    def _load_config(self, config_file: str) -> dict:
         """Load test configuration from file or use defaults"""
         default_config = {
             "timeouts": {
@@ -122,7 +122,7 @@ class GoldenPathTestSuite:
         }
 
         if config_file and Path(config_file).exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 user_config = json.load(f)
                 default_config.update(user_config)
 
@@ -355,22 +355,22 @@ server.listen(port, () => {
             k8s_manifests_dir = test_stack_dir / "k8s-manifests"
             k8s_manifests_dir.mkdir(exist_ok=True)
 
-            deployment_yaml = f'''apiVersion: apps/v1
+            deployment_yaml = '''apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{{{.Values.appName}}}}
+  name: {{.Values.appName}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{{{.Values.appName}}}}
+      app: {{.Values.appName}}
   template:
     metadata:
       labels:
-        app: {{{{.Values.appName}}}}
+        app: {{.Values.appName}}
     spec:
       containers:
-      - name: {{{{.Values.appName}}}}
+      - name: {{.Values.appName}}
         image: gcr.io/google-samples/hello-app:1.0
         ports:
         - containerPort: 8080
@@ -378,10 +378,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{{{.Values.appName}}}}
+  name: {{.Values.appName}}
 spec:
   selector:
-    app: {{{{.Values.appName}}}}
+    app: {{.Values.appName}}
   ports:
   - port: 80
     targetPort: 8080
@@ -396,15 +396,15 @@ spec:
             gitops_template_dir = test_stack_dir / "gitops-template"
             gitops_template_dir.mkdir(exist_ok=True)
 
-            argocd_app_yaml = f'''apiVersion: argoproj.io/v1alpha1
+            argocd_app_yaml = '''apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: {{{{.Values.appName}}}}
+  name: {{.Values.appName}}
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: {{{{.Values.gitopsRepoUrl}}}}
+    repoURL: {{.Values.gitopsRepoUrl}}
     targetRevision: HEAD
     path: k8s-manifests
   destination:
@@ -580,7 +580,7 @@ if __name__ == "__main__":
             # Test agent functionality
             try:
                 agent_test_result = self.run_command(
-                    f"python3 test_agent.py",
+                    "python3 test_agent.py",
                     cwd=agent_dir,
                     timeout=60,
                     env={
@@ -863,7 +863,7 @@ if __name__ == "__main__":
             # Test 4: Invalid file path handling
             try:
                 invalid_path = self.workspace_dir / "nonexistent" / "file.txt"
-                content = invalid_path.read_text()
+                invalid_path.read_text()
                 error_scenarios.append({
                     "scenario": "Invalid file path",
                     "handled": False,
@@ -904,7 +904,7 @@ if __name__ == "__main__":
             test_func
         )
 
-    def run_all_tests(self) -> Dict:
+    def run_all_tests(self) -> dict:
         """Execute all tests and generate comprehensive report"""
         logger.info("Starting Golden Path Demo Test Suite")
         logger.info(f"Workspace: {self.workspace_dir}")
@@ -961,7 +961,7 @@ if __name__ == "__main__":
 
         return summary
 
-    def generate_test_commands(self) -> Dict[str, str]:
+    def generate_test_commands(self) -> dict[str, str]:
         """Generate individual test commands for manual execution"""
         commands = {
             "prerequisites": "python3 golden_path_tests.py --test prerequisites",

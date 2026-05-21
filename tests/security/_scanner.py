@@ -7,10 +7,9 @@ pre-commit hook all use exactly the same rules.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Iterator, List, Mapping, Tuple
-
 
 # ---------------------------------------------------------------------------
 # Pattern catalogue
@@ -165,7 +164,7 @@ def _is_documentation_path(path: Path, repo_root: Path) -> bool:
     return rel in PATHS_WITH_DOCUMENTATION
 
 
-def scan(roots: Iterable[Path], *, repo_root: Path | None = None) -> List[Finding]:
+def scan(roots: Iterable[Path], *, repo_root: Path | None = None) -> list[Finding]:
     """Scan every file under ``roots`` for credential patterns.
 
     Filters at three levels:
@@ -179,7 +178,7 @@ def scan(roots: Iterable[Path], *, repo_root: Path | None = None) -> List[Findin
     Returns a list of :class:`Finding` instances. Empty list ⇒ all clean.
     """
     repo_root = repo_root or Path.cwd()
-    findings: List[Finding] = []
+    findings: list[Finding] = []
     for root in roots:
         for path in walk(root):
             try:
@@ -208,6 +207,6 @@ def scan(roots: Iterable[Path], *, repo_root: Path | None = None) -> List[Findin
     return findings
 
 
-def hard_findings(findings: Iterable[Finding]) -> List[Finding]:
+def hard_findings(findings: Iterable[Finding]) -> list[Finding]:
     """Return only findings outside documented paths."""
     return [f for f in findings if not f.pattern.startswith("docpath:")]

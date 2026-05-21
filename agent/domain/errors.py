@@ -8,7 +8,6 @@ infrastructure → domain boundary. Domain code never raises
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import Optional
 
 
 class DomainError(Exception):
@@ -34,7 +33,7 @@ class Unauthorized(DomainError):
 class RateLimited(DomainError):
     """The remote service rate-limited us."""
 
-    def __init__(self, message: str, retry_after: Optional[timedelta] = None) -> None:
+    def __init__(self, message: str, retry_after: timedelta | None = None) -> None:
         super().__init__(message)
         self.retry_after = retry_after
 

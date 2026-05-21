@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import os
 from datetime import timedelta
-from typing import Optional
+from typing import Any
 
 from agent.domain.errors import (
     ExternalSystemError,
@@ -24,19 +24,19 @@ logger = logging.getLogger(__name__)
 class PyGithubAdapter:
     """Thin wrapper. Lazily imports PyGithub so unit tests don't need it."""
 
-    def __init__(self, token: Optional[str] = None, *, owner: Optional[str] = None) -> None:
+    def __init__(self, token: str | None = None, *, owner: str | None = None) -> None:
         self._token = token or os.environ.get("GITHUB_TOKEN")
         self._owner = owner or os.environ.get("GITHUB_USERNAME")
-        self._client = None
-        self._user = None
+        self._client: Any = None
+        self._user: Any = None
 
-    def _ensure(self):
+    def _ensure(self) -> Any:
         if self._client is not None:
             return self._client
         if not self._token:
             raise Unauthorized("GITHUB_TOKEN is not set")
         try:
-            from github import Github  # type: ignore[import-not-found]
+            from github import Github
         except ImportError as exc:
             raise ExternalSystemError("github", exc) from exc
         self._client = Github(self._token)
@@ -45,7 +45,7 @@ class PyGithubAdapter:
             if self._owner is None:
                 self._owner = self._user.login
         except Exception as exc:
-            raise self._translate(exc)
+            raise self._translate(exc) from exc
         return self._client
 
     @property
@@ -87,7 +87,7 @@ class PyGithubAdapter:
                     repo_name,
                 )
                 return RepositoryUrl.from_app(app_name, kind, self.owner)
-            raise translated
+            raise translated from exc
 
     def delete_repository(self, owner: str, name: str) -> None:
         """Delete a GitHub repository. Destructive; no auto-rollback."""
@@ -103,7 +103,7 @@ class PyGithubAdapter:
             if cls == "UnknownObjectException":
                 logger.info("github.repo_not_found owner=%s name=%s (treated as success)", owner, name)
                 return
-            raise translated
+            raise translated from exc
 
     @staticmethod
     def _translate(exc: BaseException) -> BaseException:

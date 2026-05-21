@@ -8,7 +8,6 @@ if ArgoCD ever introduces a new status string, only this module updates.
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from agent.domain.aggregates.argo_application import ArgoApplication
 from agent.domain.errors import ExternalSystemError, K8sApplyError, Unauthorized
@@ -145,7 +144,7 @@ class KubectlArgoApplicationProjectionService(ArgoApplicationProjectionPort):
     def __init__(self, kubectl: KubernetesReadPort) -> None:
         self._kubectl = kubectl
 
-    def project(self, app_name: AppName) -> Optional[ArgoApplication]:
+    def project(self, app_name: AppName) -> ArgoApplication | None:
         try:
             cr = self._kubectl.get_json("application", app_name.value, namespace=ARGOCD_NAMESPACE)
         except K8sApplyError as exc:

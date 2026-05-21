@@ -9,11 +9,11 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Optional
 
 from agent.application.cleanup import CleanupApplicationService
 from agent.application.onboarding import OnboardingApplicationService
 from agent.application.rollback import RollbackApplicationService
+from agent.domain.ports import EventEmitterPort
 from agent.domain.services.intent_extraction import IntentExtractionService
 from agent.domain.services.orchestration import OnboardingOrchestrationService
 from agent.domain.services.template_rendering import TemplateRenderingService
@@ -43,7 +43,7 @@ def _default_stack_root() -> Path:
     return Path(__file__).resolve().parent.parent / "cnoe-stacks"
 
 
-def _build_event_emitter():
+def _build_event_emitter() -> EventEmitterPort:
     """Compose the event emitter from environment configuration.
 
     Always emits to the logger. If ``EVENTS_JSONL_PATH`` is set, also appends
@@ -58,7 +58,7 @@ def _build_event_emitter():
 
 def build_onboarding_service(
     *,
-    stack_root: Optional[Path] = None,
+    stack_root: Path | None = None,
     enable_llm: bool = True,
 ) -> OnboardingApplicationService:
     """Wire the production graph and return the application service."""
@@ -90,14 +90,14 @@ def build_onboarding_service(
     return OnboardingApplicationService(orchestration)
 
 
-def build_rollback_service(*, default_owner: Optional[str] = None) -> RollbackApplicationService:
+def build_rollback_service(*, default_owner: str | None = None) -> RollbackApplicationService:
     git = GitCliAdapter()
     emitter = _build_event_emitter()
     owner = default_owner or os.environ.get("GITHUB_USERNAME")
     return RollbackApplicationService(git=git, events=emitter, default_owner=owner)
 
 
-def build_cleanup_service(*, default_owner: Optional[str] = None) -> CleanupApplicationService:
+def build_cleanup_service(*, default_owner: str | None = None) -> CleanupApplicationService:
     """Compose the cleanup service.
 
     The repository deleter is wired only if a GitHub token is available; if it

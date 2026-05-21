@@ -43,7 +43,8 @@ class _StubOrchestration:
         self.received_request = request
         run = OnboardingRun.begin(request)
         run.record_intent(self._app_name, StackName("nodejs"))
-        run.begin_step("extract_intent"); run.complete_step("extract_intent")
+        run.begin_step("extract_intent")
+        run.complete_step("extract_intent")
         run.source_repo_url = f"https://github.com/acme/{self._app_name.value}-source.git"
         run.gitops_repo_url = f"https://github.com/acme/{self._app_name.value}-gitops.git"
         run.namespace = self._app_name.value

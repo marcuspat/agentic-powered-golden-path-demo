@@ -17,6 +17,21 @@ import pytest
 pytestmark = pytest.mark.security
 
 
+# Triaged advisories with no applicable fix. Each entry is reviewed and
+# justified; revisit when a patched release lands.
+#
+# PYSEC-2024-278 (CVE-2024-2057) — SSRF in langchain_community's
+#   TFIDFRetriever.load_local. The vuln DB records no fixed version for the
+#   0.3.x line, and this project never imports TFIDFRetriever.
+# PYSEC-2025-183 (CVE-2025-45768) — "weak encryption" in PyJWT, disputed by
+#   the maintainers (key length is chosen by the calling application). Pulled
+#   in transitively by PyGithub; no fixed release exists.
+IGNORED_VULN_IDS = (
+    "PYSEC-2024-278",
+    "PYSEC-2025-183",
+)
+
+
 @pytest.fixture
 def pip_audit_available() -> str:
     binary = shutil.which("pip-audit")
@@ -37,15 +52,19 @@ def test_pip_audit_finds_no_known_cves(
 ) -> None:
     req = _requirements_file(repo_root)
 
+    cmd = [
+        pip_audit_available,
+        "--requirement",
+        str(req),
+        "--format",
+        "json",
+        "--strict",
+    ]
+    for vuln_id in IGNORED_VULN_IDS:
+        cmd.extend(["--ignore-vuln", vuln_id])
+
     proc = subprocess.run(
-        [
-            pip_audit_available,
-            "--requirement",
-            str(req),
-            "--format",
-            "json",
-            "--strict",
-        ],
+        cmd,
         capture_output=True,
         text=True,
         timeout=300,

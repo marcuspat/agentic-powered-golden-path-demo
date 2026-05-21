@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 from agent.domain.errors import (
     ExternalSystemError,
@@ -37,7 +36,7 @@ class GitCliAdapter(GitWorkingCopyPort):
         self._user_name = default_user_name
         self._user_email = default_user_email
 
-    def clone(self, url: RepositoryUrl, into) -> None:
+    def clone(self, url: RepositoryUrl, into: Path) -> None:
         dest = Path(into)
         if dest.exists():
             shutil.rmtree(dest)
@@ -47,14 +46,14 @@ class GitCliAdapter(GitWorkingCopyPort):
         self._run(["git", "-C", str(dest), "config", "user.name", self._user_name])
         self._run(["git", "-C", str(dest), "config", "user.email", self._user_email])
 
-    def write_files(self, working_copy_dir, files: List[RenderedFile]) -> None:
+    def write_files(self, working_copy_dir: Path, files: list[RenderedFile]) -> None:
         root = Path(working_copy_dir)
         for f in files:
             target = root / f.relative_path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(f.content)
 
-    def commit_all(self, working_copy_dir, message: CommitMessage) -> GitSha:
+    def commit_all(self, working_copy_dir: Path, message: CommitMessage) -> GitSha:
         root = Path(working_copy_dir)
         self._run(["git", "-C", str(root), "add", "-A"])
         # Detect "nothing to commit" by checking porcelain status.
@@ -66,7 +65,7 @@ class GitCliAdapter(GitWorkingCopyPort):
         sha = self._run(["git", "-C", str(root), "rev-parse", "HEAD"]).strip()
         return GitSha(sha)
 
-    def push(self, working_copy_dir, branch: BranchName) -> None:
+    def push(self, working_copy_dir: Path, branch: BranchName) -> None:
         root = Path(working_copy_dir)
         # If repo was just initialised we may need to set the upstream.
         try:
@@ -84,9 +83,9 @@ class GitCliAdapter(GitWorkingCopyPort):
     def revert(
         self,
         url: RepositoryUrl,
-        target_sha: Optional[GitSha],
+        target_sha: GitSha | None,
         message: CommitMessage,
-    ) -> Tuple[GitSha, GitSha]:
+    ) -> tuple[GitSha, GitSha]:
         with tempfile.TemporaryDirectory(prefix="gpagent-revert-") as tmp:
             self.clone(url, Path(tmp) / url.repo_name)
             wc = Path(tmp) / url.repo_name
@@ -102,7 +101,7 @@ class GitCliAdapter(GitWorkingCopyPort):
 
     # ----- internals ----- #
 
-    def _run(self, args: List[str]) -> str:
+    def _run(self, args: list[str]) -> str:
         logger.debug("git.exec %s", args)
         proc = subprocess.run(
             args,

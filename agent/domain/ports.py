@@ -6,9 +6,10 @@ ACLs effective and the domain testable in isolation.
 """
 from __future__ import annotations
 
-from typing import List, Optional, Protocol, Tuple
+from pathlib import Path
+from typing import TYPE_CHECKING, Protocol
 
-from agent.domain.events import DomainEvent, EventEnvelope
+from agent.domain.events import EventEnvelope
 from agent.domain.values import (
     AppDescription,
     AppName,
@@ -25,6 +26,15 @@ from agent.domain.values import (
     TemplateVariables,
 )
 
+if TYPE_CHECKING:
+    # Aggregates implement these ports, so importing them at runtime would
+    # create a cycle. Under TYPE_CHECKING the forward references resolve for
+    # mypy without the runtime import.
+    from agent.domain.aggregates.argo_application import ArgoApplication
+    from agent.domain.aggregates.gitops_repository import GitOpsRepository
+    from agent.domain.aggregates.onboarding_run import OnboardingRun
+    from agent.domain.aggregates.source_repository import SourceRepository
+    from agent.domain.aggregates.stack import Stack
 
 # --------------------------------------------------------------------------- #
 # LLM
@@ -41,16 +51,16 @@ class LlmCompletionPort(Protocol):
 # --------------------------------------------------------------------------- #
 
 class StackRepositoryPort(Protocol):
-    def get(self, name: StackName) -> "Stack": ...     # type: ignore[name-defined]
-    def list_all(self) -> List["Stack"]: ...           # type: ignore[name-defined]
+    def get(self, name: StackName) -> Stack: ...
+    def list_all(self) -> list[Stack]: ...
 
 
 class TemplateRendererPort(Protocol):
     def render(
         self,
-        template_dir,
+        template_dir: Path,
         variables: TemplateVariables,
-    ) -> List[RenderedFile]: ...
+    ) -> list[RenderedFile]: ...
 
 
 # --------------------------------------------------------------------------- #
@@ -58,12 +68,12 @@ class TemplateRendererPort(Protocol):
 # --------------------------------------------------------------------------- #
 
 class SourceRepositoryPort(Protocol):
-    def create(self, app_name: AppName, description: AppDescription) -> "SourceRepository": ...   # type: ignore[name-defined]
+    def create(self, app_name: AppName, description: AppDescription) -> SourceRepository: ...
 
     def populate(
         self,
-        repo: "SourceRepository",                                                                  # type: ignore[name-defined]
-        files: List[RenderedFile],
+        repo: SourceRepository,
+        files: list[RenderedFile],
         message: CommitMessage,
         branch: BranchName = BranchName(),
     ) -> GitSha: ...
@@ -74,12 +84,12 @@ class SourceRepositoryPort(Protocol):
 # --------------------------------------------------------------------------- #
 
 class GitOpsRepositoryPort(Protocol):
-    def create(self, app_name: AppName, description: AppDescription) -> "GitOpsRepository": ...    # type: ignore[name-defined]
+    def create(self, app_name: AppName, description: AppDescription) -> GitOpsRepository: ...
 
     def populate(
         self,
-        repo: "GitOpsRepository",                                                                   # type: ignore[name-defined]
-        files: List[RenderedFile],
+        repo: GitOpsRepository,
+        files: list[RenderedFile],
         message: CommitMessage,
         branch: BranchName = BranchName(),
     ) -> GitSha: ...
@@ -88,11 +98,11 @@ class GitOpsRepositoryPort(Protocol):
 class GitWorkingCopyPort(Protocol):
     """Lower-level git operations. Used by the GitHub repository adapters."""
 
-    def clone(self, url: RepositoryUrl, into) -> None: ...
-    def write_files(self, working_copy_dir, files: List[RenderedFile]) -> None: ...
-    def commit_all(self, working_copy_dir, message: CommitMessage) -> GitSha: ...
-    def push(self, working_copy_dir, branch: BranchName) -> None: ...
-    def revert(self, url: RepositoryUrl, target_sha: Optional[GitSha], message: CommitMessage) -> Tuple[GitSha, GitSha]:
+    def clone(self, url: RepositoryUrl, into: Path) -> None: ...
+    def write_files(self, working_copy_dir: Path, files: list[RenderedFile]) -> None: ...
+    def commit_all(self, working_copy_dir: Path, message: CommitMessage) -> GitSha: ...
+    def push(self, working_copy_dir: Path, branch: BranchName) -> None: ...
+    def revert(self, url: RepositoryUrl, target_sha: GitSha | None, message: CommitMessage) -> tuple[GitSha, GitSha]:
         """Revert ``target_sha`` (or HEAD) on the remote. Returns (reverted_sha, new_head_sha)."""
         ...
 
@@ -102,18 +112,18 @@ class GitWorkingCopyPort(Protocol):
 # --------------------------------------------------------------------------- #
 
 class ArgoApplicationPort(Protocol):
-    def register(self, app: "ArgoApplication") -> None: ...                                         # type: ignore[name-defined]
-    def get(self, app_name: AppName) -> Optional["ArgoApplication"]: ...                            # type: ignore[name-defined]
+    def register(self, app: ArgoApplication) -> None: ...
+    def get(self, app_name: AppName) -> ArgoApplication | None: ...
     def remove(self, app_name: AppName) -> None: ...
 
 
 class KubernetesApplyPort(Protocol):
-    def apply(self, manifest_yaml: str, *, namespace: Optional[Namespace] = None) -> None: ...
+    def apply(self, manifest_yaml: str, *, namespace: Namespace | None = None) -> None: ...
 
 
 class KubernetesReadPort(Protocol):
-    def get_json(self, resource: str, name: str, *, namespace: Optional[Namespace] = None) -> dict: ...
-    def delete(self, resource: str, name: str, *, namespace: Optional[Namespace] = None, ignore_not_found: bool = True) -> None: ...
+    def get_json(self, resource: str, name: str, *, namespace: Namespace | None = None) -> dict: ...
+    def delete(self, resource: str, name: str, *, namespace: Namespace | None = None, ignore_not_found: bool = True) -> None: ...
 
 
 class ArgoApplicationProjectionPort(Protocol):
@@ -123,7 +133,7 @@ class ArgoApplicationProjectionPort(Protocol):
     domain ``SyncStatus`` / ``HealthStatus`` enums.
     """
 
-    def project(self, app_name: AppName) -> Optional["ArgoApplication"]: ...   # type: ignore[name-defined]
+    def project(self, app_name: AppName) -> ArgoApplication | None: ...
 
 
 # --------------------------------------------------------------------------- #
@@ -131,8 +141,8 @@ class ArgoApplicationProjectionPort(Protocol):
 # --------------------------------------------------------------------------- #
 
 class OnboardingRunRepositoryPort(Protocol):
-    def add(self, run: "OnboardingRun") -> None: ...                                                # type: ignore[name-defined]
-    def get(self, correlation_id: CorrelationId) -> Optional["OnboardingRun"]: ...                  # type: ignore[name-defined]
+    def add(self, run: OnboardingRun) -> None: ...
+    def get(self, correlation_id: CorrelationId) -> OnboardingRun | None: ...
 
 
 # --------------------------------------------------------------------------- #

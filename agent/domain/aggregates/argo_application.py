@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from agent.domain.values import (
     AppName,
@@ -33,8 +32,8 @@ class ArgoApplication:
         cls,
         app_name: AppName,
         gitops_repo_url: RepositoryUrl,
-        namespace: Optional[Namespace] = None,
-    ) -> "ArgoApplication":
+        namespace: Namespace | None = None,
+    ) -> ArgoApplication:
         ns = namespace or Namespace.from_app(app_name)
         return cls(
             name=app_name,
