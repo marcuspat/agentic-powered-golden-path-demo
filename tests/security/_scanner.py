@@ -120,6 +120,13 @@ PATHS_WITH_DOCUMENTATION = (
     "agent/infrastructure/github/adapter.py",
     "agent/infrastructure/openrouter/adapter.py",
     "agent/domain/values.py",
+    # The scanner's own source defines the pattern catalogue and the
+    # security tests carry synthetic leak samples by design. They legitimately
+    # contain secret-shaped strings; demote to soft findings.
+    "tests/security/_scanner.py",
+    "tests/security/_scanner_cli.py",
+    "tests/security/test_no_plaintext_credentials.py",
+    "tests/performance/bench_secret_scan.py",
 )
 
 
