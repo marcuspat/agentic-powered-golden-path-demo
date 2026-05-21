@@ -269,13 +269,21 @@ argocd app delete <app-name>
    🌐 http://inventory-api.cnoe.localtest.me
    ```
 
-## 🎉 Success Metrics
+## 🎉 What the Golden Path Delivers
 
-- **84.8%** automation success rate
-- **< 2 minutes** end-to-end deployment time
-- **Zero manual steps** for standard deployments
-- **Complete GitOps** workflow implementation
-- **Production-ready** Kubernetes manifests
+- **Zero manual steps** for a standard onboarding — one request provisions the
+  source repo, the GitOps repo, and the ArgoCD Application.
+- **Complete GitOps workflow** — two-repo pattern with ArgoCD reconciliation.
+- **Production-leaning Kubernetes manifests** — namespace isolation, network
+  policies, resource quotas, ExternalSecret references (no plaintext secrets in
+  git), and a ServiceMonitor for observability.
+- **Layered, tested architecture** — domain / application / infrastructure
+  separation with unit, integration, security, and performance test tiers.
+
+> End-to-end timing and success-rate figures depend on your cluster, network,
+> and the upstream GitHub / OpenRouter latency. Run `make test-perf` for the
+> in-repo performance budgets; capture live metrics from your own environment
+> before quoting them.
 
 ## 🔧 Troubleshooting
 

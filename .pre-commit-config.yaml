@@ -1,0 +1,25 @@
+# Pre-commit hooks for the Golden Path agent.
+#
+# Install once with:  pip install pre-commit && pre-commit install
+# Run on demand with: pre-commit run --all-files
+#
+# The gate mirrors `make lint` plus the standalone credential scan so that
+# secrets and lint regressions are caught before they ever reach CI.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+        # Formatting is advisory here; ruff check is the enforced gate.
+        stages: [manual]
+
+  - repo: local
+    hooks:
+      - id: secret-scan
+        name: secret-scan (no plaintext credentials)
+        entry: python3 -m tests.security._scanner_cli
+        language: system
+        pass_filenames: false
+        always_run: true
