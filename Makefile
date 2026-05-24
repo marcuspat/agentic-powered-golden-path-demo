@@ -71,7 +71,7 @@ clean:  ## Remove pytest/ruff/mypy/__pycache__ caches.
 	rm -rf .pytest_cache .ruff_cache .mypy_cache .benchmarks .coverage htmlcov
 
 agent-cli:  ## Convenience wrapper: `make agent-cli REQUEST="..."`.
-	@if [ -z "$$REQUEST" ]; then \
+	@if [ -z "$${REQUEST:-}" ]; then \
 	  echo "Usage: make agent-cli REQUEST=\"onboard inventory-api\"" >&2; \
 	  exit 2; \
 	fi

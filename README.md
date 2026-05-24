@@ -306,7 +306,8 @@ python -m agent --validate-env
 | [`docs/adr/`](docs/adr/) | 20 Architecture Decision Records |
 | [`docs/ddd/`](docs/ddd/) | 12 Domain-Driven Design documents + context map |
 | [`docs/USE-CASE-GUIDE.md`](docs/USE-CASE-GUIDE.md) | Persona-based usage guide |
-| [`docs/VALIDATION-REPORT.md`](docs/VALIDATION-REPORT.md) | Captured command outputs and gate results |
+| [`docs/VALIDATION-REPORT.md`](docs/VALIDATION-REPORT.md) | Captured gate-stage command outputs |
+| [`docs/VALIDATION-REPORT-FULL.md`](docs/VALIDATION-REPORT-FULL.md) | Exhaustive command-by-command coverage (every CLI flag, Make target, script) |
 | [`docs/testing-strategy.md`](docs/testing-strategy.md) | Test tier rationale and structure |
 | [`docs/gitops-integration-workflow.md`](docs/gitops-integration-workflow.md) | GitOps workflow deep-dive |
 | [`docs/monitoring-observability-strategy.md`](docs/monitoring-observability-strategy.md) | Observability approach |
