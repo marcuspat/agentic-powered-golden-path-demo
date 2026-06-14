@@ -7,21 +7,21 @@ of the onboarding agent without requiring actual credentials.
 """
 
 import os
-import sys
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
 import shutil
+import sys
+import tempfile
+import unittest
+from unittest.mock import Mock, patch
 
 # Add the agent module to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from agent import (
-    extract_app_name_from_request,
-    create_github_repo,
-    populate_repo_from_stack,
+from agent import (  # noqa: E402
     create_argocd_application,
-    run_onboarding_flow
+    create_github_repo,
+    extract_app_name_from_request,
+    populate_repo_from_stack,
+    run_onboarding_flow,
 )
 
 class TestGoldenPathAgent(unittest.TestCase):
@@ -159,27 +159,18 @@ PORT=8080
         self.assertEqual(source_url, "https://github.com/test-user/inventory-api-source.git")
         self.assertEqual(gitops_url, "https://github.com/test-user/inventory-api-gitops.git")
 
-    def test_populate_repo_from_stack_success(self):
+    @patch('agent.subprocess.run')
+    def test_populate_repo_from_stack_success(self, mock_subprocess):
         """Test successful repository population from template."""
-        # Create a temporary repo directory
-        temp_repo = os.path.join(self.temp_dir, "test_repo")
-        os.makedirs(temp_repo)
-
-        # Initialize a git repo
-        os.system(f"cd {temp_repo} && git init --bare")
-        test_repo_url = f"file://{temp_repo}"
-
-        # Test the population (this should create a separate clone)
+        mock_subprocess.return_value = Mock(returncode=0)
         result = populate_repo_from_stack(
-            test_repo_url,
+            "https://github.com/test/test-repo.git",
             self.template_dir,
             self.test_app_name,
             self.test_description
         )
-
-        # The function should handle git operations internally
-        # We test the template substitution logic separately
-        self.assertTrue(result or True)  # Allow for test environment limitations
+        self.assertTrue(result)
+        self.assertEqual(mock_subprocess.call_count, 5)
 
     def test_populate_repo_from_stack_template_not_found(self):
         """Test repository population when template doesn't exist."""
