@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test suite for src/agent.py ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ OnboardingAgent (OOP / production implementation).
+Test suite for src/agent.py ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ OnboardingAgent (OOP / production implementation).
 
 Run:
     PYTHONPATH=src pytest src/test_agent.py -v
@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
 # ---------------------------------------------------------------------------
 
 def _set_env(**kwargs):
-    """Context-free env setter ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ patches os.environ for the test."""
+    """Context-free env setter ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ patches os.environ for the test."""
     for k, v in kwargs.items():
         os.environ[k] = v
 
@@ -131,7 +131,7 @@ class TestExtractAppInfo(unittest.TestCase):
         self.assertEqual(info.name, "payment-processor")
 
     def test_fallback_default_when_nothing_matches(self):
-        """Generic request with no identifiable name ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ 'new-app'."""
+        """Generic request with no identifiable name ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ 'new-app'."""
         with patch.object(self.agent, '_call_openrouter_api', side_effect=Exception):
             info = self.agent.extract_app_info("Just deploy something generic")
         self.assertEqual(info.name, "new-app")
@@ -275,7 +275,7 @@ class TestCreateArgocdApplication(unittest.TestCase):
 
     @patch('agent.subprocess.run')
     def test_generic_exception_returns_false(self, mock_run):
-        """Any exception from subprocess ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ not just CalledProcessError ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ must return False."""
+        """Any exception from subprocess ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ not just CalledProcessError ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ must return False."""
         mock_run.side_effect = Exception("connection refused")
         result = self.agent.create_argocd_application(
             self._app_info(), "https://github.com/x/gitops.git"
@@ -354,7 +354,7 @@ class TestRunOnboardingFlow(unittest.TestCase):
         with patches[0], patches[1], patches[2], patches[3]:
             result = self.agent.run_onboarding_flow("Deploy inventory-api")
 
-        # ArgoCD failure doesn't fail the overall flow ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ argocd_created is False
+        # ArgoCD failure doesn't fail the overall flow ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ argocd_created is False
         self.assertTrue(result['success'])
         self.assertFalse(result['argocd_created'])
 
@@ -389,8 +389,8 @@ class TestRunOnboardingFlow(unittest.TestCase):
 class TestTemplateRendering(unittest.TestCase):
 
     def test_variables_substituted(self):
-        from jinja2 import Environment
-        from agent import AppInfo  # noqa: I001
+        from jinja2 import Environment  # noqa: I001
+        from agent import AppInfo
         info = AppInfo(name="order-svc", description="Order service")
         tpl = "name: {{appName}}\ndesc: {{description}}\nimage: {{imageName}}"
         rendered = Environment().from_string(tpl).render(
