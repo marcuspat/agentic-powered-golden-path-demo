@@ -26,7 +26,6 @@ import requests
 from dotenv import load_dotenv
 from github import Github, GithubException
 from jinja2 import Environment, FileSystemLoader
-from kubernetes import client
 
 # Load environment variables
 load_dotenv()
@@ -235,7 +234,7 @@ Respond only with valid JSON, no additional text.
 
         except GithubException as e:
             if e.status == 422:
-                logger.info("Repos may already exist Ã¢ÂÂ retrieving existing")
+                logger.info("Repos may already exist ÃÂ¢ÃÂÃÂ retrieving existing")
                 return self._get_existing_repositories(app_info.name)
             raise
 
@@ -325,7 +324,7 @@ Respond only with valid JSON, no additional text.
                         with open(dest, 'w') as f:
                             f.write(rendered)
                     except Exception as e:
-                        logger.warning(f"Template render failed for {src}: {e} Ã¢ÂÂ copying as-is")
+                        logger.warning(f"Template render failed for {src}: {e} ÃÂ¢ÃÂÃÂ copying as-is")
                         shutil.copy2(src, dest)
                 else:
                     shutil.copy2(src, dest)
@@ -509,23 +508,23 @@ def main() -> int:
 
         if result['success']:
             tag = "[DRY-RUN] " if args.dry_run else ""
-            print(f"\n{tag}Ã°ÂÂÂ Onboarding completed successfully!")
+            print(f"\n{tag}ÃÂ°ÃÂÃÂÃÂ Onboarding completed successfully!")
             ai = result['app_info']
             repos = result['repositories']
-            print(f"  Ã°ÂÂÂ¦ App:         {ai.name}")
-            print(f"  Ã°ÂÂÂ Description: {ai.description}")
-            print(f"  Ã°ÂÂÂ Source repo: {repos.source_repo_url}")
-            print(f"  Ã¢ÂÂÃ¯Â¸Â  GitOps repo: {repos.gitops_repo_url}")
-            print(f"  Ã°ÂÂÂ ArgoCD:      {result['argocd_created']}")
+            print(f"  ÃÂ°ÃÂÃÂÃÂ¦ App:         {ai.name}")
+            print(f"  ÃÂ°ÃÂÃÂÃÂ Description: {ai.description}")
+            print(f"  ÃÂ°ÃÂÃÂÃÂ Source repo: {repos.source_repo_url}")
+            print(f"  ÃÂ¢ÃÂÃÂÃÂ¯ÃÂ¸ÃÂ  GitOps repo: {repos.gitops_repo_url}")
+            print(f"  ÃÂ°ÃÂÃÂÃÂ ArgoCD:      {result['argocd_created']}")
             if not args.dry_run:
-                print(f"\n  Ã°ÂÂÂ App URL: http://{ai.name}.cnoe.localtest.me")
+                print(f"\n  ÃÂ°ÃÂÃÂÃÂ App URL: http://{ai.name}.cnoe.localtest.me")
         else:
-            print(f"\nÃ¢ÂÂ Onboarding failed: {result['error']}")
+            print(f"\nÃÂ¢ÃÂÃÂ Onboarding failed: {result['error']}")
             return 1
 
     except Exception as e:
         logger.error(f"Agent execution failed: {e}")
-        print(f"\nÃ°ÂÂÂ¥ {e}")
+        print(f"\nÃÂ°ÃÂÃÂÃÂ¥ {e}")
         return 1
 
     return 0
