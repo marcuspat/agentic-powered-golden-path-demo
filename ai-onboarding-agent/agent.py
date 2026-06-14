@@ -4,14 +4,14 @@ The production implementation is in src/agent.py (OOP, type-annotated, --dry-run
 This file is kept for backward compatibility with existing demo scripts.
 """
 
-import os
-import subprocess
-import json
-import re
-from github import Github
-from kubernetes import client, config
-from jinja2 import Template
 import logging
+import os
+import re
+import subprocess
+
+from github import Github
+from jinja2 import Template
+from kubernetes import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -187,11 +187,11 @@ def extract_app_name_from_request(request):
     except Exception as e:
         logger.warning(f"AI extraction failed: {e}")
 
-    # Fallback: pattern matching â ordered from most to least specific.
+    # Fallback: pattern matching Ã¢ÂÂ ordered from most to least specific.
     # Key insight: intended app names are always hyphenated identifiers;
     # stop-words and English words are not.
     patterns = [
-        # 1. Explicit "called X" or "named X" â highest confidence
+        # 1. Explicit "called X" or "named X" Ã¢ÂÂ highest confidence
         r'(?:called|named)\s+["\']?([a-zA-Z0-9][a-zA-Z0-9-]+)["\']?',
         # 2. Hyphenated identifier immediately before a service/app keyword
         r'([a-zA-Z0-9][a-zA-Z0-9-]+-[a-zA-Z0-9-]+)\s+(?:service|app|application)',
@@ -204,7 +204,7 @@ def extract_app_name_from_request(request):
         match = re.search(pattern, request, re.IGNORECASE)
         if match:
             candidate = match.group(1).lower()
-            # FIX: reject stop-words â they're not app names
+            # FIX: reject stop-words Ã¢ÂÂ they're not app names
             if candidate not in _REGEX_STOP_WORDS:
                 return candidate
 
@@ -237,8 +237,8 @@ def run_onboarding_flow(developer_request):
         return False
 
     logger.info(f"--- Onboarding for '{app_name}' Complete! ---")
-    logger.info(f"ArgoCD is now deploying your application.")
-    logger.info(f"Access ArgoCD: https://cnoe.localtest.me/argocd")
+    logger.info("ArgoCD is now deploying your application.")
+    logger.info("Access ArgoCD: https://cnoe.localtest.me/argocd")
     logger.info(f"App will be available at: http://{app_name}.cnoe.localtest.me")
 
     return True
@@ -258,8 +258,8 @@ if __name__ == "__main__":
     success = run_onboarding_flow(developer_request)
 
     if success:
-        logger.info("â Golden Path onboarding completed successfully!")
+        logger.info("Ã¢ÂÂ Golden Path onboarding completed successfully!")
         exit(0)
     else:
-        logger.error("â Golden Path onboarding failed!")
+        logger.error("Ã¢ÂÂ Golden Path onboarding failed!")
         exit(1)
