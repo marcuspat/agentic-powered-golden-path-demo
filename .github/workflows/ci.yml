@@ -35,10 +35,10 @@ jobs:
         run: ruff check src/ --select E,W,F,I --ignore E501
 
   # ---------------------------------------------------------------------------
-  # Unit tests â v1 functional agent (ai-onboarding-agent/)
+  # Unit tests - v1 functional agent (ai-onboarding-agent/)
   # ---------------------------------------------------------------------------
   test-v1:
-    name: Unit tests Â· v1 agent
+    name: Unit tests - v1 agent
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,10 +68,10 @@ jobs:
           python -m pytest test_agent.py -v --tb=short
 
   # ---------------------------------------------------------------------------
-  # Unit tests â v2 OOP agent (src/)
+  # Unit tests - v2 OOP agent (src/)
   # ---------------------------------------------------------------------------
   test-v2:
-    name: Unit tests Â· v2 agent (src/)
+    name: Unit tests - v2 agent (src/)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
