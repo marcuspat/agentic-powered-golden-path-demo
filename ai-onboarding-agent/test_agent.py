@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch
 # Add the agent module to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from agent import (  # noqa: E402
+from agent import (  # noqa: I001
     create_argocd_application,
     create_github_repo,
     extract_app_name_from_request,
