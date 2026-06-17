@@ -1,491 +1,242 @@
-# Golden Path AI-Powered Developer Onboarding Demo
+# ð Agentic Golden Path â AI-Powered Developer Onboarding
 
-This project implements a complete AI-powered developer onboarding workflow that transforms natural language requests into deployed applications using GitOps principles.
+> **Say what you want to deploy. Watch it appear in ArgoCD.**
 
-## 🚀 Quick Start
+Natural language in â GitHub repos created â Kubernetes workload running â ArgoCD synced. Under 2 minutes, zero manual steps.
+
+[![CI](https://github.com/marcuspat/agentic-powered-golden-path-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/marcuspat/agentic-powered-golden-path-demo/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
+
+---
+
+## â¡ Quick Start â Three Commands
 
 ```bash
-# Install dependencies
-python -m pip install -r requirements.txt
+git clone https://github.com/marcuspat/agentic-powered-golden-path-demo.git
+cd agentic-powered-golden-path-demo
 
-# Set your environment variables
-export GITHUB_TOKEN=your_github_personal_access_token
-export GITHUB_USERNAME=your_github_username
-export OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# Start the development environment with ArgoCD
-./idpbuilder create
-
-# Run the demo
-cd ai-onboarding-agent
-bash demo.sh demo
+make setup      # downloads idpbuilder, creates Python venv, installs deps
+make bootstrap  # spins up KinD cluster with ArgoCD + Tekton + Nginx (~3 min)
 ```
 
-## 📋 Prerequisites
+Set your credentials:
 
-- **Docker**: For running idpbuilder cluster
-- **kubectl**: For Kubernetes interaction
-- **Python 3.8+**: For the AI agent
-- **GitHub Personal Access Token**: For repository creation
-- **GitHub Username**: Your GitHub username
-
-## 🏗️ Architecture Overview
-
-### Phase 1: Infrastructure Setup
-- **idpbuilder**: Creates KinD cluster with ArgoCD and Tekton
-- **CNOE Ecosystem**: Cloud Native Operational Excellence platform
-- **GitOps**: Automated deployment via ArgoCD
-
-### Phase 2: Stack Templates
-- **NodeJS Application Template**: Standardized Node.js service structure
-- **GitOps Template**: Kubernetes manifests with parameter substitution
-- **Jinja2 Templating**: Dynamic configuration based on app names
-
-### Phase 3: AI Agent
-- **Natural Language Processing**: Extracts app names from developer requests
-- **OpenRouter Integration**: Uses AI models for intelligent parsing
-- **Three Core Tools**:
-  1. `create_github_repo()` - Creates source and GitOps repositories
-  2. `populate_repo_from_stack()` - Populates repos from templates
-  3. `create_argocd_application()` - Triggers GitOps deployment
-
-## 🔧 Components
-
-### AI Agent (`ai-onboarding-agent/agent.py`)
-- **OpenRouter API Integration**: Natural language processing
-- **Pattern Matching**: Fallback extraction methods
-- **GitHub Integration**: Repository creation and management
-- **GitOps Automation**: ArgoCD application deployment
-
-### Stack Templates
-- **NodeJS Template** (`cnoe-stacks/nodejs-template/`):
-  ```
-  app-source/
-  ├── index.js          # Simple HTTP server
-  ├── package.json       # Node.js dependencies
-  ├── Dockerfile         # Container build
-  ├── .env.example       # Environment variables
-  └── k8s/              # Kubernetes manifests
-  ```
-
-- **GitOps Template** (`cnoe-stacks/nodejs-gitops-template/`):
-  ```
-  ├── deployment.yaml    # Kubernetes deployment
-  ├── service.yaml       # Service configuration
-  ├── ingress.yaml       # External access
-  └── app.yaml          # ArgoCD application
-  ```
-
-### idpbuilder Integration
-- **KinD Cluster**: Kubernetes in Docker
-- **ArgoCD**: GitOps deployment tool
-- **Tekton**: CI/CD pipelines
-- **Pre-configured**: Ready for development
-
-## 🎯 Usage Examples
-
-### Basic Usage
 ```bash
-# Deploy a new service
-cd ai-onboarding-agent
-python3 agent.py "I need to deploy my new NodeJS service called inventory-api"
-
-# Create a user management system
-python3 agent.py "Create a user-management service"
-
-# Deploy a payment processor
-python3 agent.py "Deploy my payment-processor application"
+export GITHUB_TOKEN=ghp_...
+export GITHUB_USERNAME=your-username
+export OPENROUTER_API_KEY=sk-or-...
 ```
 
-### Demo Script Usage
+Then run the demo:
+
 ```bash
-cd ai-onboarding-agent
-bash demo.sh demo                                   # Run complete demo
-bash demo.sh test                                   # Run tests only
-bash demo.sh agent "Deploy my user-service"        # Test specific request
-bash demo.sh cluster                                # Check cluster status
-bash demo.sh help                                   # Show help
+make preflight  # 8 pre-flight checks (cluster, ArgoCD, GitHub API, deps)
+make demo       # AI agent onboards a new developer app end-to-end
 ```
 
-**Available Demo Commands:**
-- `demo` - Complete end-to-end demo with AI processing
-- `test` - Run test suite to verify functionality
-- `agent "<request>"` - Test specific deployment request
-- `cluster` - Check Kubernetes cluster status
-- `help` - Show all available options
-- `interactive` - Run interactive expert training mode
+That's it. Watch ArgoCD at **https://cnoe.localtest.me/argocd** as the app deploys itself.
 
-## 🎓 Interactive Demo Mode
+---
 
-The **interactive-demo.sh** script provides a comprehensive walkthrough with visual feedback and step-by-step guidance.
+## ðºï¸ How It Works
 
-### Usage
-```bash
-cd ai-onboarding-agent
-
-# Run interactive demo
-./interactive-demo.sh
-
-# Show help
-./interactive-demo.sh --help
+```
+Developer: "I need to deploy my inventory-api service"
+                        â
+                        â¼
+              âââââââââââââââââââ
+              â  OpenRouter LLM  â  â extracts app name from natural language
+              ââââââââââ¬âââââââââ
+                       â AppNameExtracted
+                       â¼
+              âââââââââââââââââââ
+              â  GitHub Agent   â  â creates inventory-api + inventory-api-gitops repos
+              ââââââââââ¬âââââââââ
+                       â ReposCreated
+                       â¼
+              âââââââââââââââââââ
+              â Template Engine â  â Jinja2 renders Node.js stack into both repos
+              ââââââââââ¬âââââââââ
+                       â ReposPopulated
+                       â¼
+              âââââââââââââââââââ
+              â  ArgoCD Agent   â  â registers ArgoCD Application CRD
+              ââââââââââ¬âââââââââ
+                       â ArgoCDAppCreated â GitOpsSynced â WorkloadHealthy
+                       â¼
+         http://inventory-api.cnoe.localtest.me  ð
 ```
 
-### Demo Workflow
-- **Step 1**: Environment setup verification
-- **Step 2**: Infrastructure verification (idpbuilder cluster, ArgoCD)
-- **Step 3**: AI-powered name extraction demonstration
-- **Step 4**: Template system verification
-- **Step 5**: Agent workflow testing
-- **Step 6**: Access information display
-- **Step 7**: Live demo mode with interactive requests
+**7 domain events. Zero manual steps.**
 
-Both `demo.sh` and `interactive-demo.sh` will automatically create real GitHub repositories and deploy applications when GitHub credentials are provided.
+---
 
-## 🌐 Access Points
+## ð Prerequisites
 
-### ArgoCD Dashboard
-- **URL**: https://cnoe.localtest.me/argocd
-- **Username**: admin
-- **Password**: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
+| Requirement | Notes |
+|-------------|-------|
+| **Docker** (24+) | KinD cluster runs inside Docker |
+| **Python 3.8+** | AI agent runtime |
+| **GitHub PAT** | Scopes: `repo`, `workflow` |
+| **OpenRouter API key** | Free tier works; used for NLP name extraction |
+| `kubectl`, `curl`, `git` | Standard CLI tools |
 
-### Deployed Applications
-- **Pattern**: http://{app-name}.cnoe.localtest.me
-- **Example**: http://inventory-api.cnoe.localtest.me
+`make setup` will tell you what's missing. `make preflight` validates everything before the live demo.
 
-## 🚀 ArgoCD Setup & Management
+---
 
-### Starting ArgoCD
+## ð¯ Make Targets
 
-**Method 1: Using idpbuilder (Recommended)**
-```bash
-# From project root
-./idpbuilder create
-
-# This will automatically start:
-# - KinD cluster
-# - ArgoCD with default configuration
-# - Tekton pipelines
-# - All required dependencies
+```
+make help         â self-documenting target reference
+make setup        â download idpbuilder binary + create venv + install deps
+make bootstrap    â idpbuilder create (KinD + ArgoCD + Tekton + Nginx)
+make preflight    â 8 pre-demo checks (env, tools, cluster, ArgoCD, GitHub, templates)
+make demo         â run the AI onboarding agent end-to-end
+make test         â run unit + integration test suite (v1 agent, v2 agent, manifests)
+make status       â cluster + ArgoCD app status snapshot
+make clean        â destroy cluster + remove venv + reset binaries
 ```
 
-**Method 2: Manual ArgoCD Installation**
-```bash
-# If you need to install ArgoCD manually
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+---
 
-# Wait for ArgoCD to be ready
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+## ðï¸ Architecture
+
+### Two Agent Implementations
+
+| | v1 Agent (`ai-onboarding-agent/agent.py`) | v2 Agent (`src/agent.py`) |
+|--|--|--|
+| **Style** | Procedural | OOP `OnboardingAgent` class |
+| **Entry point** | `make demo` | Direct import |
+| **Config** | 3 env vars | 5 env vars, configurable paths |
+| **Purpose** | Live demo | Production reference |
+
+Both implementations are intentionally preserved. See [ADR-0022](docs/adr/0022-agent-architecture-v1-vs-v2.md) for the rationale.
+
+### Platform Stack
+
+```
+KinD (Kubernetes in Docker)
+âââ ArgoCD          â GitOps reconciliation (https://cnoe.localtest.me/argocd)
+âââ Tekton          â CI pipeline runtime
+âââ Nginx           â Ingress controller (*.cnoe.localtest.me)
+âââ CNOE ecosystem  â Cloud Native Operational Excellence baseline
 ```
 
-### ArgoCD Access & Configuration
+### Stack Templates (`cnoe-stacks/`)
 
-**Get ArgoCD Credentials:**
-```bash
-# Get the initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+- **`nodejs-template/`** â Node.js app source (index.js, Dockerfile, k8s manifests)
+- **`nodejs-gitops-template/`** â ArgoCD Application + Kustomize overlays
 
-# Port-forward to access ArgoCD locally (if not using idpbuilder)
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-```
+---
 
-**Access ArgoCD Dashboard:**
-- **URL**: https://cnoe.localtest.me/argocd (with idpbuilder)
-- **URL**: http://localhost:8080 (with port-forward)
-- **Username**: admin
-- **Password**: Use command above to retrieve
+## ð Verify a Deployment
 
-**ArgoCD CLI Setup:**
-```bash
-# Install ArgoCD CLI
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-
-# Login to ArgoCD
-argocd login cnoe.localtest.me:443 --username admin --password $(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d) --insecure
-```
-
-### Verifying ArgoCD Status
+After `make demo`:
 
 ```bash
-# Check ArgoCD server status
-kubectl get pods -n argocd
-
-# Check ArgoCD application status
-argocd app list
-
-# Check cluster status
-kubectl cluster-info
-```
-
-### Common ArgoCD Operations
-
-```bash
-# Sync an application manually
-argocd app sync <app-name>
-
-# Check application health
+# ArgoCD CLI
 argocd app get <app-name>
+argocd app wait <app-name> --health
 
-# View application logs
-argocd app logs <app-name>
+# Kubernetes
+kubectl get pods -n <app-name>
 
-# Delete an application
-argocd app delete <app-name>
+# Hit the endpoint
+curl http://<app-name>.cnoe.localtest.me
 ```
 
-## 🔄 Workflow Process
-
-1. **Developer Request**: Natural language input
-   ```
-   "I need to deploy my new NodeJS service called inventory-api"
-   ```
-
-2. **AI Processing**: Extract application name
-   ```
-   App Name: "inventory-api"
-   ```
-
-3. **Repository Creation**: Create source and GitOps repos
-   ```
-   ✅ inventory-api-source
-   ✅ inventory-api-gitops
-   ```
-
-4. **Template Population**: Populate with app-specific config
-   ```
-   appName: inventory-api
-   description: NodeJS application for inventory-api
-   ```
-
-5. **GitOps Deployment**: ArgoCD automatic deployment
-   ```
-   ✅ ArgoCD Application created
-   ✅ Kubernetes deployment started
-   ```
-
-6. **Application Live**: Service accessible via ingress
-   ```
-   🌐 http://inventory-api.cnoe.localtest.me
-   ```
-
-## 🎉 Success Metrics
-
-- **84.8%** automation success rate
-- **< 2 minutes** end-to-end deployment time
-- **Zero manual steps** for standard deployments
-- **Complete GitOps** workflow implementation
-- **Production-ready** Kubernetes manifests
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-1. **GitHub Token Errors**
-   ```bash
-   # Verify token has correct scopes
-   curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
-   ```
-
-2. **Cluster Not Running**
-   ```bash
-   # Check available clusters
-   ./idpbuilder get clusters
-
-   # Start idpbuilder cluster
-   ./idpbuilder create --name demo-cluster
-
-   # Alternative: Use demo script to check/start cluster
-   cd ai-onboarding-agent && bash demo.sh cluster
-   ```
-
-3. **ArgoCD Not Running**
-   ```bash
-   # Check if ArgoCD is installed
-   kubectl get namespace argocd
-
-   # If not installed, start it with idpbuilder
-   ./idpbuilder create
-
-   # Or install manually
-   kubectl create namespace argocd
-   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-   # Check ArgoCD pod status
-   kubectl get pods -n argocd
-   ```
-
-4. **ArgoCD Access Issues**
-   ```bash
-   # Get ArgoCD password
-   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
-
-   # Check ArgoCD service
-   kubectl get svc -n argocd
-
-   # Port-forward if needed
-   kubectl port-forward svc/argocd-server -n argocd 8080:443
-   ```
-
-5. **Applications Not Syncing**
-   ```bash
-   # Check ArgoCD application status
-   argocd app list
-
-   # Force sync application
-   argocd app sync <app-name> --force
-
-   # Check application logs
-   argocd app logs <app-name>
-   ```
-
-## 📊 Project Structure
-
-```
-ai-powered-golden-path-demo/
-├── ai-onboarding-agent/           # Main AI agent
-│   ├── agent.py                   # Core agent implementation
-│   ├── test_agent.py             # Comprehensive test suite
-│   ├── demo.sh                   # Demo script
-│   ├── interactive-demo.sh       # Interactive expert training
-│   ├── requirements.txt          # Python dependencies
-│   ├── idpbuilder               # idpbuilder binary (copied here)
-│   └── .env.example              # Environment template
-├── src/                          # Additional source files
-│   ├── agent.py                  # Alternative agent implementation
-│   └── test_agent.py            # Additional test files
-├── tests/                        # Test suite
-│   ├── golden_path_tests.py     # Core functionality tests
-│   └── test-integration-e2e.py  # End-to-end integration tests
-├── cnoe-stacks/                   # Stack templates
-│   ├── nodejs-template/          # NodeJS app template
-│   └── nodejs-gitops-template/   # GitOps manifest template
-├── agents/                       # AI agent definitions
-│   ├── argocd-gitops-specialist.md
-│   ├── doc-planner.md
-│   └── microtask-breakdown.md
-├── docs/                         # Documentation
-├── scripts/                      # Utility scripts
-├── idpbuilder                    # Kubernetes setup tool (main binary)
-├── idpbuilder-linux-amd64.tar.gz  # Downloaded idpbuilder package
-├── ai-platform-engineering/      # Platform engineering reference
-└── plan.md                       # Implementation plan
-```
-
-## 🔐 Environment Configuration
-
-### Required Environment Variables
-```bash
-# GitHub Configuration
-export GITHUB_TOKEN=your_github_personal_access_token
-export GITHUB_USERNAME=your_github_username
-
-# OpenRouter API (demo key provided)
-export OPENROUTER_API_KEY=your_openrouter_api_key_here
-
-# Optional: Kubernetes Configuration
-export KUBECONFIG=/path/to/kubeconfig
-```
-
-## 📚 Documentation
-
-- **Implementation Plan**: See `plan.md` for detailed specifications
-- **Agent Code**: See `ai-onboarding-agent/agent.py` for complete implementation
-- **Template Structure**: See `cnoe-stacks/` for template examples
-- **Test Suite**: See `ai-onboarding-agent/test_agent.py` for comprehensive testing
+ArgoCD dashboard: **https://cnoe.localtest.me/argocd**
+- Username: `admin`
+- Password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d`
 
 ---
 
-## 🎯 About idpbuilder
+## ð Repository Structure
 
-This project includes **idpbuilder** - an internal development platform binary launcher that spins up a complete internal developer platform using industry standard technologies like Kubernetes, Argo, and backstage with only Docker required as a dependency.
-
-This can be useful in several ways:
-* Create a single binary which can demonstrate an IDP reference implementation.
-* Use within CI to perform integration testing.
-* Use as a local development environment for platform engineers.
+```
+agentic-powered-golden-path-demo/
+âââ Makefile                     # â start here: make help
+âââ scripts/
+â   âââ setup.sh                 # platform-aware bootstrap (macOS/Linux, amd64/arm64)
+â   âââ preflight.sh             # 8 pre-demo validation checks
+âââ ai-onboarding-agent/
+â   âââ agent.py                 # v1 demo agent (procedural)
+â   âââ test_agent.py            # v1 unit tests
+âââ src/
+â   âââ agent.py                 # v2 production agent (OOP)
+â   âââ test_agent.py            # v2 unit tests
+âââ cnoe-stacks/
+â   âââ nodejs-template/         # Node.js application source template
+â   âââ nodejs-gitops-template/  # ArgoCD + k8s manifests template
+âââ tests/
+â   âââ golden_path_tests.py
+â   âââ test-integration-e2e.py
+âââ docs/
+â   âââ adr/                     # 22 Architecture Decision Records (ADR-0001â0022)
+â   âââ ddd/                     # 13 Domain-Driven Design documents
+âââ requirements.txt
+âââ .github/workflows/ci.yml     # 5-job CI: lint, test-v1, test-v2, validate-manifests, smoke
+```
 
 ---
 
-**Golden Path**: The optimal, automated path from idea to production deployment. 🚀
+## ð Decision Trail
 
-## Installation
-### Using [Homebrew](https://brew.sh)
-+ Stable Version
+This repo ships with complete architectural documentation:
 
-   ```bash
-   brew install cnoe-io/tap/idpbuilder
-   ```
-+ Specific Stable Version
+- **22 ADRs** (`docs/adr/`) â every non-obvious decision recorded with context, alternatives, and consequences
+- **13 DDD documents** (`docs/ddd/`) â bounded contexts, domain events, ubiquitous language, and the [implementation runbook](docs/ddd/13-implementation-runbook.md)
 
-   ```bash
-   brew install cnoe-io/tap/idpbuilder@<version>
-   ```
-+ Nightly Version
+Key ADRs:
+- [ADR-0021](docs/adr/0021-makefile-single-entrypoint.md) â Why Makefile over Taskfile / justfile / pyproject scripts
+- [ADR-0022](docs/adr/0022-agent-architecture-v1-vs-v2.md) â v1 vs v2 agent co-existence strategy
 
-   ```bash
-   brew install cnoe-io/tap/idpbuilder-nightly
-   ```
+---
 
-### From Releases
-Another way to get started is to grab the idpbuilder binary for your platform and run it. You can visit our [releases](https://github.com/cnoe-io/idpbuilder/releases) page to download the version for your system, or run the following commands:
+## ð§ Troubleshooting
 
+**idpbuilder fails to start**
 ```bash
-arch=$(if [[ "$(uname -m)" == "x86_64" ]]; then echo "amd64"; else uname -m; fi)
-os=$(uname -s | tr '[:upper:]' '[:lower:]')
-
-
-idpbuilder_latest_tag=$(curl --silent "https://api.github.com/repos/cnoe-io/idpbuilder/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-curl -LO  https://github.com/cnoe-io/idpbuilder/releases/download/$idpbuilder_latest_tag/idpbuilder-$os-$arch.tar.gz
-tar xvzf idpbuilder-$os-$arch.tar.gz
+docker ps          # Docker must be running
+make clean         # tear down any partial state
+make bootstrap     # retry
 ```
 
-Download latest extract idpbuilder binary
+**ArgoCD stuck / apps not syncing**
 ```bash
-cd ~/bin
-curl -vskL -O https://github.com/cnoe-io/idpbuilder/releases/latest/download/idpbuilder-linux-amd64.tar.gz
-tar xvzf idpbuilder-linux-amd64.tar.gz idpbuilder
+make status        # snapshot current state
+kubectl get pods -n argocd
+argocd app sync <app-name> --force
 ```
 
-## Getting Started
-
-You can then run idpbuilder with the create argument to spin up your CNOE IDP:
-
+**GitHub push fails**
 ```bash
-# From project root
-./idpbuilder create
-
-# Or with custom cluster name
-./idpbuilder create --name demo-cluster
-
-# Check cluster status
-./idpbuilder get status
-
-# Stop cluster when done
-./idpbuilder delete
+curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/user
+# Must return your user object â not a 401
 ```
 
-For more detailed information, checkout our [documentation](https://cnoe.io/docs/idpbuilder) on getting started with idpbuilder.
+**`openai` module not found / import errors**
+```bash
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Community
+See [docs/ddd/13-implementation-runbook.md](docs/ddd/13-implementation-runbook.md) for the full troubleshooting guide.
 
-- If you have questions or concerns about this tool, please feel free to reach out to us on the [CNCF Slack Channel](https://cloud-native.slack.com/archives/C05TN9WFN5S).
-- You can also join our community meetings to meet the team and ask any questions. Checkout [this calendar](https://calendar.google.com/calendar/embed?src=064a2adfce866ccb02e61663a09f99147f22f06374e7a8994066bdc81e066986%40group.calendar.google.com&ctz=America%2FLos_Angeles) for more information.
+---
 
-## Contribution
+## ð¤ Contributing
 
-Checkout the [contribution doc](./CONTRIBUTING.md) for contribution guidelines and more information on how to set up your local environment.
+```bash
+make test          # run full test suite before opening a PR
+```
 
+CI runs on every push: lint (ruff), test-v1, test-v2, manifest validation, dry-run smoke.
 
-<!-- JUST BADGES & LINKS -->
-[codespell-badge]: https://github.com/cnoe-io/idpbuilder/actions/workflows/codespell.yaml/badge.svg
-[codespell-link]: https://github.com/cnoe-io/idpbuilder/actions/workflows/codespell.yaml
+---
 
-[e2e-badge]: https://github.com/cnoe-io/idpbuilder/actions/workflows/e2e.yaml/badge.svg
-[e2e-link]: https://github.com/cnoe-io/idpbuilder/actions/workflows/e2e.yaml
+## ð License
 
-[report-badge]: https://goreportcard.com/badge/github.com/cnoe-io/idpbuilder
-[report-link]: https://goreportcard.com/report/github.com/cnoe-io/idpbuilder
-
-[commit-activity-badge]: https://img.shields.io/github/commit-activity/m/cnoe-io/idpbuilder
-[commit-activity-link]: https://github.com/cnoe-io/idpbuilder/pulse
+Apache-2.0 â see [LICENSE](LICENSE).
