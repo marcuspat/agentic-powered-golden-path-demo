@@ -4,7 +4,7 @@
 
 Natural language in → GitHub repos created → Kubernetes workload running → ArgoCD synced. Under 2 minutes, zero manual steps.
 
-[![CI](https://github.com/marcuspat/agentic-powered-golden-path-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/marcuspat/agentic-powered-golden-path-demo/actions/workflows/ci.yml)
+[![CI](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
 
@@ -13,7 +13,7 @@ Natural language in → GitHub repos created → Kubernetes workload running →
 ## ⚡ Quick Start — Three Commands
 
 ```bash
-git clone https://github.com/marcuspat/agentic-powered-golden-path-demo.git
+git clone https://github.com/adventurewave-labs/agentic-powered-golden-path-demo.git
 cd agentic-powered-golden-path-demo
 
 make setup      # downloads idpbuilder, creates Python venv, installs deps

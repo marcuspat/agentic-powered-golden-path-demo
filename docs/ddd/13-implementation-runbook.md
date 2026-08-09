@@ -19,7 +19,7 @@ GitHub PAT scopes required: `repo` (full), `workflow` (optional, for Actions tri
 ## Phase 0 â Clone and Setup (Generic Infrastructure Context)
 
 ```bash
-git clone https://github.com/marcuspat/agentic-powered-golden-path-demo
+git clone https://github.com/adventurewave-labs/agentic-powered-golden-path-demo
 cd agentic-powered-golden-path-demo
 make setup
 ```
