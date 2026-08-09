@@ -1,9 +1,9 @@
 # Release Notes — v1.1.0
 
 **Project:** agentic-powered-golden-path-demo  
-**Repository:** https://github.com/marcuspat/agentic-powered-golden-path-demo  
+**Repository:** https://github.com/adventurewave-labs/agentic-powered-golden-path-demo  
 **Release Date:** 2026-06-13  
-**Merged PR:** [#1 — docs: add full ADR + DDD documentation set](https://github.com/marcuspat/agentic-powered-golden-path-demo/pull/1)  
+**Merged PR:** [#1 — docs: add full ADR + DDD documentation set](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/pull/1)  
 **Branch:** `claude/create-adr-ddd-docs-iOd23` → `main`  
 **License:** Apache 2.0
 
@@ -85,7 +85,7 @@ Docs-only release. Drop-in compatible with v1.0.0.
 
 ## Links
 
-- [Repository](https://github.com/marcuspat/agentic-powered-golden-path-demo)
-- [GitHub Release](https://github.com/marcuspat/agentic-powered-golden-path-demo/releases/tag/v1.1.0)
-- [PR #1](https://github.com/marcuspat/agentic-powered-golden-path-demo/pull/1)
-- [ADR Index](https://github.com/marcuspat/agentic-powered-golden-path-demo/blob/main/docs/adr/README.md)
+- [Repository](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo)
+- [GitHub Release](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/releases/tag/v1.1.0)
+- [PR #1](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/pull/1)
+- [ADR Index](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/blob/main/docs/adr/README.md)
