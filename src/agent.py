@@ -508,23 +508,23 @@ def main() -> int:
 
         if result['success']:
             tag = "[DRY-RUN] " if args.dry_run else ""
-            print(f"\n{tag}ÃÂ°ÃÂÃÂÃÂ Onboarding completed successfully!")
+            print(f"🎉 Onboarding completed successfully!")
             ai = result['app_info']
             repos = result['repositories']
-            print(f"  ÃÂ°ÃÂÃÂÃÂ¦ App:         {ai.name}")
-            print(f"  ÃÂ°ÃÂÃÂÃÂ Description: {ai.description}")
-            print(f"  ÃÂ°ÃÂÃÂÃÂ Source repo: {repos.source_repo_url}")
-            print(f"  ÃÂ¢ÃÂÃÂÃÂ¯ÃÂ¸ÃÂ  GitOps repo: {repos.gitops_repo_url}")
-            print(f"  ÃÂ°ÃÂÃÂÃÂ ArgoCD:      {result['argocd_created']}")
+            print(f"  📦 App:         {ai.name}")
+            print(f"  📝 Description: {ai.description}")
+            print(f"  📂 Source repo: {repos.source_repo_url}")
+            print(f"  ⚙️  GitOps repo: {repos.gitops_repo_url}")
+            print(f"  🚀 ArgoCD:      {result['argocd_created']}")
             if not args.dry_run:
-                print(f"\n  ÃÂ°ÃÂÃÂÃÂ App URL: http://{ai.name}.cnoe.localtest.me")
+                print(f"🌐 App URL: http://{ai.name}.cnoe.localtest.me")
         else:
-            print(f"\nÃÂ¢ÃÂÃÂ Onboarding failed: {result['error']}")
+            print(f"❌ Onboarding failed: {result['error']}")
             return 1
 
     except Exception as e:
         logger.error(f"Agent execution failed: {e}")
-        print(f"\nÃÂ°ÃÂÃÂÃÂ¥ {e}")
+        print(f"💥 {e}")
         return 1
 
     return 0
