@@ -2,7 +2,9 @@
 
 > **Say what you want to deploy. Watch it appear in ArgoCD.**
 
-Natural language in → GitHub repos created → Kubernetes workload running → ArgoCD synced. Under 2 minutes, zero manual steps.
+Natural language in → GitHub repos created → Kubernetes workload running → ArgoCD synced. Under 2 minutes\*, zero manual steps.
+
+<sub>\* Timing is for the `make demo` onboarding flow itself, once the cluster is already running. One-time cluster bootstrap (`make bootstrap`) takes ~3 min separately — see Quick Start below.</sub>
 
 [![CI](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/adventurewave-labs/agentic-powered-golden-path-demo/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
