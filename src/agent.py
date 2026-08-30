@@ -234,7 +234,7 @@ Respond only with valid JSON, no additional text.
 
         except GithubException as e:
             if e.status == 422:
-                logger.info("Repos may already exist ÃÂ¢ÃÂÃÂ retrieving existing")
+                logger.info("Repos may already exist ÃÂ¢ÃÂÃÂ retrieving existing")
                 return self._get_existing_repositories(app_info.name)
             raise
 
@@ -324,7 +324,7 @@ Respond only with valid JSON, no additional text.
                         with open(dest, 'w') as f:
                             f.write(rendered)
                     except Exception as e:
-                        logger.warning(f"Template render failed for {src}: {e} ÃÂ¢ÃÂÃÂ copying as-is")
+                        logger.warning(f"Template render failed for {src}: {e} ÃÂ¢ÃÂÃÂ copying as-is")
                         shutil.copy2(src, dest)
                 else:
                     shutil.copy2(src, dest)
@@ -508,7 +508,7 @@ def main() -> int:
 
         if result['success']:
             tag = "[DRY-RUN] " if args.dry_run else ""
-            print(f"🎉 Onboarding completed successfully!")
+            print(f"{tag}🎉 Onboarding completed successfully!")
             ai = result['app_info']
             repos = result['repositories']
             print(f"  📦 App:         {ai.name}")
